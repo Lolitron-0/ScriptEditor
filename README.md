@@ -1,2 +1,2 @@
 # ScriptEditor
-Block visual constructor ov visual novels' scripts
+Block visual constructor for visual novels' scripts
