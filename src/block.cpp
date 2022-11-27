@@ -12,18 +12,18 @@ Block::Block(int x, int y)
     mBotGradient.setColorAt(0.1,fillColor);
     mBrush = QBrush(mBotGradient);
 
-    QPropertyAnimation* shadowOn = new QPropertyAnimation(this, "shadowColor", this);
-    shadowOn->setDuration(400);
-    shadowOn->setStartValue(QColor(0,0,0,0));
-    shadowOn->setEndValue(QColor(0,0,0,150));
+    QPropertyAnimation* shadowOnAnim = new QPropertyAnimation(this, "shadowColor", this);
+    shadowOnAnim->setDuration(100);
+    shadowOnAnim->setStartValue(QColor(0,0,0,0));
+    shadowOnAnim->setEndValue(QColor(0,0,0,150));
 
+    QPropertyAnimation* liftUpAnim = new QPropertyAnimation(this, "liftUpDelta", this);
+    liftUpAnim->setDuration(100);
+    liftUpAnim->setStartValue(QPointF(0,0));
+    liftUpAnim->setEndValue(QPointF(10,-10));
 
-    QPropertyAnimation* shadowOff = new QPropertyAnimation(this, "shadowColor", this);
-    shadowOff->setDuration(600);
-    shadowOff->setStartValue(QColor(0,0,0,150));
-    shadowOff->setEndValue(QColor(0,0,0,0));
-
-    mGrabAnim.addAnimation(shadowOn);
+    mGrabAnim.addAnimation(shadowOnAnim);
+    mGrabAnim.addAnimation(liftUpAnim);
 }
 
 void Block::draw(QPainter &painter)
@@ -36,10 +36,12 @@ void Block::draw(QPainter &painter)
     painter.setBrush(mShadowColor);
     painter.drawRoundedRect(mRect.translated(QPoint(-10,10)), roundRadius, roundRadius);
 
-    painter.setBrush(mBrush);
-    painter.drawRoundedRect(mRect, roundRadius, roundRadius);
 
-    if(mSelected){
+    painter.setBrush(mBrush);
+    painter.drawRoundedRect(
+                mRect.translated(mLiftUpDelta), roundRadius, roundRadius); //fixme: double painting
+
+    if(mSelected){ //sel outline
         auto pen =  QPen(selectionColor);
         pen.setWidth(selectionWidth);
         painter.setPen(pen);
@@ -54,7 +56,7 @@ void Block::mousePressEvent(QMouseEvent *event)
         mSelected = true;
         mGrabAnim.setDirection(QAnimationGroup::Forward);
         mGrabAnim.start();
-        mGrabDelta = mRect.topLeft() - event->pos();
+        mGrabDelta = event->pos() - mRect.topLeft();
     }
     else
         mSelected = false;
@@ -63,8 +65,10 @@ void Block::mousePressEvent(QMouseEvent *event)
 void Block::mouseReleaseEvent(QMouseEvent *event)
 {
     mGrabbed = false;
+    mGrabDelta = QPointF(0.,0.);
     mGrabAnim.setDirection(QAnimationGroup::Backward);
-    mGrabAnim.start();
+    if(mShadowColor.alpha()>0)
+        mGrabAnim.start();
 }
 
 void Block::mouseDoubleClickEvent(QMouseEvent *event)
@@ -75,7 +79,7 @@ void Block::mouseDoubleClickEvent(QMouseEvent *event)
 void Block::mouseMoveEvent(QMouseEvent *event)
 {
     if (mGrabbed){
-        mRect.translate(event->pos()-mRect.topLeft()+mGrabDelta);
+        mRect.translate(event->pos()-mRect.topLeft()-mGrabDelta);
     }
 }
 
@@ -89,5 +93,14 @@ void Block::setShadowColor(const QColor &newShadowColor)
     if (mShadowColor == newShadowColor)
         return;
     mShadowColor = newShadowColor;
-    emit shadowColorChanged();
+}
+
+QPointF Block::getLiftUpDelta() const
+{
+    return mLiftUpDelta;
+}
+
+void Block::setLiftUpDelta(QPointF newLiftUpDelta)
+{
+    mLiftUpDelta = newLiftUpDelta;
 }

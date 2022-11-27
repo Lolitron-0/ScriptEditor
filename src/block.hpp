@@ -10,7 +10,8 @@ class Block : public QObject
 {
     Q_OBJECT
 public:
-    Q_PROPERTY(QColor shadowColor MEMBER mShadowColor READ getShadowColor WRITE setShadowColor NOTIFY shadowColorChanged)
+    Q_PROPERTY(QColor shadowColor MEMBER mShadowColor READ getShadowColor WRITE setShadowColor)
+    Q_PROPERTY(QPointF liftUpDelta MEMBER mLiftUpDelta READ getLiftUpDelta WRITE setLiftUpDelta)
 
     Block(int x, int y);
 
@@ -25,20 +26,23 @@ public:
     const QColor &getShadowColor() const;
     void setShadowColor(const QColor &newShadowColor);
 
+    QPointF getLiftUpDelta() const;
+    void setLiftUpDelta(QPointF newLiftUpDelta);
+
 signals:
-    void shadowColorChanged();
     void requestRepaint();
 
 private:
-    QRect mRect;
+    QRectF mRect;
     QLinearGradient mBotGradient;
     QBrush mBrush;
     QSequentialAnimationGroup mGrabAnim;
+    QPointF mLiftUpDelta;
     QColor mShadowColor;
 
     bool mSelected{false};
     bool mGrabbed{false};
-    QPoint mGrabDelta;
+    QPointF mGrabDelta;
 
 private:
     static QColor selectionColor;
