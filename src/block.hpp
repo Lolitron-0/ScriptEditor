@@ -3,6 +3,7 @@
 
 #include <QMouseEvent>
 #include <QPainter>
+#include <QParallelAnimationGroup>
 #include <QPropertyAnimation>
 #include <QSequentialAnimationGroup>
 
@@ -30,13 +31,14 @@ public:
     void setLiftUpDelta(QPointF newLiftUpDelta);
 
 signals:
-    void requestRepaint();
+    void startContiniousRepaint();
+    void stopContiniousRepaint();
 
 private:
     QRectF mRect;
     QLinearGradient mBotGradient;
     QBrush mBrush;
-    QSequentialAnimationGroup mGrabAnim;
+    QParallelAnimationGroup mGrabAnim;
     QPointF mLiftUpDelta;
     QColor mShadowColor;
 

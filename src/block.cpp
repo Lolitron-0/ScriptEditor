@@ -1,4 +1,5 @@
 #include "block.hpp"
+#include <QDebug>
 
 QColor Block::selectionColor = QColor(Qt::green).darker(100);
 QColor Block::fillColor = QColor(Qt::red).darker(100);
@@ -13,17 +14,24 @@ Block::Block(int x, int y)
     mBrush = QBrush(mBotGradient);
 
     QPropertyAnimation* shadowOnAnim = new QPropertyAnimation(this, "shadowColor", this);
-    shadowOnAnim->setDuration(100);
+    shadowOnAnim->setDuration(150);
     shadowOnAnim->setStartValue(QColor(0,0,0,0));
     shadowOnAnim->setEndValue(QColor(0,0,0,150));
 
     QPropertyAnimation* liftUpAnim = new QPropertyAnimation(this, "liftUpDelta", this);
     liftUpAnim->setDuration(100);
     liftUpAnim->setStartValue(QPointF(0,0));
-    liftUpAnim->setEndValue(QPointF(10,-10));
+    liftUpAnim->setEndValue(QPointF(7,-7));
 
     mGrabAnim.addAnimation(shadowOnAnim);
     mGrabAnim.addAnimation(liftUpAnim);
+
+    connect(&mGrabAnim, &QAnimationGroup::stateChanged, this, [this](QAbstractAnimation::State newState, QAbstractAnimation::State){
+        if (newState == QAbstractAnimation::Stopped)
+            emit stopContiniousRepaint();
+        else if (newState == QAbstractAnimation::Running)
+            emit startContiniousRepaint();
+    });
 }
 
 void Block::draw(QPainter &painter)
@@ -33,9 +41,9 @@ void Block::draw(QPainter &painter)
     mBrush = QBrush(mBotGradient);
     painter.setPen(Qt::transparent);
 
+    //shadow
     painter.setBrush(mShadowColor);
-    painter.drawRoundedRect(mRect.translated(QPoint(-10,10)), roundRadius, roundRadius);
-
+    painter.drawRoundedRect(mRect.translated(QPoint()), roundRadius, roundRadius);
 
     painter.setBrush(mBrush);
     painter.drawRoundedRect(
@@ -45,7 +53,8 @@ void Block::draw(QPainter &painter)
         auto pen =  QPen(selectionColor);
         pen.setWidth(selectionWidth);
         painter.setPen(pen);
-        painter.drawRoundedRect(mRect, roundRadius, roundRadius);
+        painter.setBrush(Qt::transparent);
+        painter.drawRoundedRect(mRect.translated(mLiftUpDelta), roundRadius, roundRadius);
     }
 }
 
@@ -79,6 +88,8 @@ void Block::mouseDoubleClickEvent(QMouseEvent *event)
 void Block::mouseMoveEvent(QMouseEvent *event)
 {
     if (mGrabbed){
+        //mRect.setX(event->pos().x() + mGrabDelta.x());
+        //mRect.setY(event->pos().y() + mGrabDelta.y());
         mRect.translate(event->pos()-mRect.topLeft()-mGrabDelta);
     }
 }

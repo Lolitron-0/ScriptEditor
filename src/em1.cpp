@@ -13,9 +13,14 @@ Em1::Em1(QWidget *parent)
    mGraph = new Graph("ksdjgfk", QPoint(0,100));
    mCurrentNode = mGraph;
    setFocusPolicy(Qt::StrongFocus);
-   mRefreshTimer.start(5);
+   connect(&block, &Block::startContiniousRepaint, this, [this]() {
+        this->mRefreshTimer.start(5);
+   });
+   connect(&block, &Block::stopContiniousRepaint, this, [this]() {
+        this->mRefreshTimer.stop();
+   });
    connect(&mRefreshTimer, &QTimer::timeout, this, [this](){
-       this->repaint();
+        this->repaint();
    });
 }
 
