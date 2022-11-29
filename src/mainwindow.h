@@ -3,7 +3,6 @@
 
 #include "em1.hpp"
 
-#include <editor.hpp>
 #include <QMainWindow>
 #include <QTextEdit>
 

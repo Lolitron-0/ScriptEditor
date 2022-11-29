@@ -10,14 +10,12 @@ CONFIG += c++17
 
 SOURCES += \
     src/block.cpp \
-    src/editor.cpp \
     src/em1.cpp \
     src/main.cpp \
     src/mainwindow.cpp
 
 HEADERS += \
     src/block.hpp \
-    src/editor.hpp \
     src/em1.hpp \
     src/mainwindow.h
 
