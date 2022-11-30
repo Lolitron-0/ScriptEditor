@@ -5,21 +5,21 @@ QColor Block::selectionColor = QColor(Qt::green).darker(100);
 QColor Block::fillColor = QColor(Qt::red).darker(100);
 
 
-Block::Block(int x, int y)
-    :mRect(x,y,100,60), mGrabAnim(this),
+Block::Block(float x, float y)
+    :GraphicElementBase(x,y,100,60), mGrabAnim(this),
      mShadowColor(Qt::transparent)
 {
-    mBotGradient.setColorAt(0,fillColor.darker(200));
-    mBotGradient.setColorAt(0.1,fillColor);
+    mBotGradient.setColorAt(0,fillColor.lighter(150));
+    mBotGradient.setColorAt(0.2,fillColor);
     mBrush = QBrush(mBotGradient);
 
     QPropertyAnimation* shadowOnAnim = new QPropertyAnimation(this, "shadowColor", this);
-    shadowOnAnim->setDuration(150);
-    shadowOnAnim->setStartValue(QColor(0,0,0,0));
-    shadowOnAnim->setEndValue(QColor(0,0,0,150));
+    shadowOnAnim->setDuration(100);
+    shadowOnAnim->setStartValue(QColor(100,100,100,0));
+    shadowOnAnim->setEndValue(QColor(100,100,100,255));
 
     QPropertyAnimation* liftUpAnim = new QPropertyAnimation(this, "liftUpDelta", this);
-    liftUpAnim->setDuration(100);
+    liftUpAnim->setDuration(70);
     liftUpAnim->setStartValue(QPointF(0,0));
     liftUpAnim->setEndValue(QPointF(7,-7));
 
@@ -32,66 +32,88 @@ Block::Block(int x, int y)
         else if (newState == QAbstractAnimation::Running)
             emit startContiniousRepaint();
     });
+
+    _addChild(&mPin);
 }
 
 void Block::draw(QPainter &painter)
 {
     mBotGradient.setStart(mRect.bottomLeft());
     mBotGradient.setFinalStop(mRect.topLeft());
+    if (mHovered) mBotGradient.setColorAt(0, Qt::white);
+    else mBotGradient.setColorAt(0, fillColor.lighter(150));
     mBrush = QBrush(mBotGradient);
     painter.setPen(Qt::transparent);
 
     //shadow
     painter.setBrush(mShadowColor);
-    painter.drawRoundedRect(mRect.translated(QPoint()), roundRadius, roundRadius);
+    painter.drawRoundedRect(mRect, roundRadius, roundRadius);
 
     painter.setBrush(mBrush);
     painter.drawRoundedRect(
-                mRect.translated(mLiftUpDelta), roundRadius, roundRadius); //fixme: double painting
+                _getDrawRect(), roundRadius, roundRadius);
+
+    //shifting pin properly
+    mPin.setPosition(_getDrawRect().topRight()-
+                     QPointF( //offset
+                         mPin.getRect().width() + 5, //magic number whatever
+                         -_getDrawRect().height()/2 + mPin.getRect().height()/2));
+    mPin.draw(painter);
 
     if(mSelected){ //sel outline
         auto pen =  QPen(selectionColor);
         pen.setWidth(selectionWidth);
         painter.setPen(pen);
         painter.setBrush(Qt::transparent);
-        painter.drawRoundedRect(mRect.translated(mLiftUpDelta), roundRadius, roundRadius);
+        painter.drawRoundedRect(_getDrawRect(), roundRadius, roundRadius);
     }
 }
 
-void Block::mousePressEvent(QMouseEvent *event)
+bool Block::mousePressEvent(QMouseEvent *event)
 {
-    if (mRect.contains(event->pos())) {
+    if (GraphicElementBase::mousePressEvent(event)) return true;
+
+    if (mHovered){
         mGrabbed = true;
         mSelected = true;
         mGrabAnim.setDirection(QAnimationGroup::Forward);
         mGrabAnim.start();
         mGrabDelta = event->pos() - mRect.topLeft();
+        return true;
     }
     else
         mSelected = false;
+    return false;
 }
 
-void Block::mouseReleaseEvent(QMouseEvent *event)
+bool Block::mouseReleaseEvent(QMouseEvent *event)
 {
+    if (GraphicElementBase::mouseReleaseEvent(event)) return true;
+
     mGrabbed = false;
     mGrabDelta = QPointF(0.,0.);
     mGrabAnim.setDirection(QAnimationGroup::Backward);
     if(mShadowColor.alpha()>0)
         mGrabAnim.start();
+
+    return mHovered;
 }
 
-void Block::mouseDoubleClickEvent(QMouseEvent *event)
+bool Block::mouseDoubleClickEvent(QMouseEvent *event)
 {
-
+    if (GraphicElementBase::mouseDoubleClickEvent(event)) return true;
+    return mHovered;
 }
 
-void Block::mouseMoveEvent(QMouseEvent *event)
+bool Block::mouseMoveEvent(QMouseEvent *event)
 {
+    if (GraphicElementBase::mouseMoveEvent(event)) return true;
+
     if (mGrabbed){
-        //mRect.setX(event->pos().x() + mGrabDelta.x());
-        //mRect.setY(event->pos().y() + mGrabDelta.y());
         mRect.translate(event->pos()-mRect.topLeft()-mGrabDelta);
     }
+
+    return mHovered;
 }
 
 const QColor &Block::getShadowColor() const
@@ -114,4 +136,9 @@ QPointF Block::getLiftUpDelta() const
 void Block::setLiftUpDelta(QPointF newLiftUpDelta)
 {
     mLiftUpDelta = newLiftUpDelta;
+}
+
+QRectF Block::_getDrawRect()
+{
+    return mRect.translated(mLiftUpDelta);
 }

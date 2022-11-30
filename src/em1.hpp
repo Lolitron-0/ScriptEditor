@@ -36,6 +36,7 @@ private:
 
     void renderGraph(QPainterPath *, Graph*);
 
+    QImage mGrid;
     Block block;
     Graph* mGraph;
     Graph mTempNode;

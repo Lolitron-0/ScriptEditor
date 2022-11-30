@@ -10,13 +10,20 @@ CONFIG += c++17
 
 SOURCES += \
     src/block.cpp \
+    src/blockconnection.cpp \
+    src/blockconnectionpin.cpp \
     src/em1.cpp \
+    src/graphicelementbase.cpp \
     src/main.cpp \
     src/mainwindow.cpp
 
 HEADERS += \
     src/block.hpp \
+    src/blockconnection.hpp \
+    src/blockconnectionpin.hpp \
     src/em1.hpp \
+    src/graphicelementbase.h \
+    src/inputlistener.hpp \
     src/mainwindow.h
 
 FORMS += \
@@ -28,3 +35,6 @@ INCLUDEPATH += src/
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resources/res.qrc

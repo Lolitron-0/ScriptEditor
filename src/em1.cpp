@@ -10,9 +10,14 @@ Em1::Em1(QWidget *parent)
     :QWidget(parent), block(100,200)
 {
    setGeometry(parent->geometry());
+   setFocusPolicy(Qt::StrongFocus);
+   setMouseTracking(true);
+
    mGraph = new Graph("ksdjgfk", QPoint(0,100));
    mCurrentNode = mGraph;
-   setFocusPolicy(Qt::StrongFocus);
+
+   mGrid = QImage(":/images/grid.jpg");
+
    connect(&block, &Block::startContiniousRepaint, this, [this]() {
         this->mRefreshTimer.start(5);
    });
@@ -24,9 +29,12 @@ Em1::Em1(QWidget *parent)
    });
 }
 
-void Em1::paintEvent(QPaintEvent *event)
+void Em1::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
+
+    painter.drawImage(QPoint(), mGrid);
+
     block.draw(painter);
 
 

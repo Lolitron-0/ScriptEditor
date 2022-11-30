@@ -1,28 +1,32 @@
 #ifndef BLOCK_HPP
 #define BLOCK_HPP
 
+#include "blockconnectionpin.hpp"
+#include "graphicelementbase.h"
+#include "inputlistener.hpp"
+
 #include <QMouseEvent>
 #include <QPainter>
 #include <QParallelAnimationGroup>
 #include <QPropertyAnimation>
 #include <QSequentialAnimationGroup>
 
-class Block : public QObject
+class Block : public GraphicElementBase
 {
     Q_OBJECT
 public:
     Q_PROPERTY(QColor shadowColor MEMBER mShadowColor READ getShadowColor WRITE setShadowColor)
     Q_PROPERTY(QPointF liftUpDelta MEMBER mLiftUpDelta READ getLiftUpDelta WRITE setLiftUpDelta)
 
-    Block(int x, int y);
+    Block(float x, float y);
 
-    void draw(QPainter& painter);
+    void draw(QPainter& painter) override;
 
 public:
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    void mouseDoubleClickEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
+    bool mousePressEvent(QMouseEvent *event) override;
+    bool mouseReleaseEvent(QMouseEvent *event) override;
+    bool mouseDoubleClickEvent(QMouseEvent *event) override;
+    bool mouseMoveEvent(QMouseEvent *event) override;
 
     const QColor &getShadowColor() const;
     void setShadowColor(const QColor &newShadowColor);
@@ -35,7 +39,9 @@ signals:
     void stopContiniousRepaint();
 
 private:
-    QRectF mRect;
+
+    QRectF _getDrawRect();
+
     QLinearGradient mBotGradient;
     QBrush mBrush;
     QParallelAnimationGroup mGrabAnim;
@@ -46,11 +52,14 @@ private:
     bool mGrabbed{false};
     QPointF mGrabDelta;
 
+
+    BlockConnectionPin mPin;
+
 private:
     static QColor selectionColor;
     static QColor fillColor;
     static const int roundRadius = 6;
-    static const int selectionWidth = 3;
+    static const int selectionWidth = 2;
 };
 
 
