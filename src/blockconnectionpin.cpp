@@ -1,16 +1,22 @@
 #include "blockconnectionpin.hpp"
+#include "block.hpp"
 
 #include <QPainter>
 
-BlockConnectionPin::BlockConnectionPin()
-    :GraphicElementBase(0,0,15,15)
+BlockConnectionPin::BlockConnectionPin(Block *parent)
+    :GraphicElementBase(0,0,15,15, parent)
 {
-
 }
 
 bool BlockConnectionPin::mousePressEvent(QMouseEvent *event)
 {
     GraphicElementBase::mousePressEvent(event);
+/*
+    if (mHovered) {
+        mTempConnection.reset(new BlockConnection());
+        mTempConnection->init(static_cast<Block*>(mParent.get())); //we guarantee that our parent is Block
+    }
+    */
 
     return mHovered;
 }
@@ -24,6 +30,14 @@ bool BlockConnectionPin::mouseReleaseEvent(QMouseEvent *event)
 bool BlockConnectionPin::mouseDoubleClickEvent(QMouseEvent *event)
 {
     GraphicElementBase::mouseDoubleClickEvent(event);
+    return mHovered;
+}
+
+bool BlockConnectionPin::mouseMoveEvent(QMouseEvent *event)
+{
+    GraphicElementBase::mouseMoveEvent(event);
+    //if (!mTempConnection.isNull())
+    //    mTempConnection->mouseMoveEvent(event);
     return mHovered;
 }
 

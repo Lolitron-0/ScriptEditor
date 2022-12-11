@@ -3,6 +3,8 @@
 
 #include "inputlistener.hpp"
 
+#include <QSharedPointer>
+
 
 class GraphicElementBase : public InputListener {
 
@@ -10,7 +12,8 @@ public:
 
     explicit GraphicElementBase(float x, float y,
                            float w, float h,
-                           QObject* parent = nullptr);
+                           GraphicElementBase* parent = nullptr);
+    ~GraphicElementBase();
 
 
     bool mouseMoveEvent(QMouseEvent *event) override;
@@ -32,6 +35,8 @@ protected:
 
     QRectF mRect;
     bool mHovered{false};
+
+    QSharedPointer<GraphicElementBase> mParent;
 
 private:
 

@@ -1,9 +1,9 @@
 #ifndef BLOCK_HPP
 #define BLOCK_HPP
 
+#include "blockconnection.hpp"
 #include "blockconnectionpin.hpp"
 #include "graphicelementbase.h"
-#include "inputlistener.hpp"
 
 #include <QMouseEvent>
 #include <QPainter>
@@ -19,6 +19,7 @@ public:
     Q_PROPERTY(QPointF liftUpDelta MEMBER mLiftUpDelta READ getLiftUpDelta WRITE setLiftUpDelta)
 
     Block(float x, float y);
+    ~Block();
 
     void draw(QPainter& painter) override;
 
@@ -33,6 +34,8 @@ public:
 
     QPointF getLiftUpDelta() const;
     void setLiftUpDelta(QPointF newLiftUpDelta);
+
+    BlockConnectionPin &getPin();
 
 signals:
     void startContiniousRepaint();
@@ -54,6 +57,7 @@ private:
 
 
     BlockConnectionPin mPin;
+    QVector<QSharedPointer<BlockConnection>> mOutputConnections;
 
 private:
     static QColor selectionColor;

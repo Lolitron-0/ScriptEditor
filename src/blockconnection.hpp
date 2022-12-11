@@ -1,18 +1,25 @@
 #ifndef BLOCKCONNECTION_HPP
 #define BLOCKCONNECTION_HPP
 
-#include "block.hpp"
+
+#include "graphicelementbase.h"
 
 #include <QObject>
 #include <QPainterPath>
 
-class BlockConnection : public QObject
-{
-    Q_OBJECT
-public:
-    explicit BlockConnection(QObject *parent = nullptr);
+class Block;
 
-    void draw(QPainter&);
+class BlockConnection : public GraphicElementBase
+{
+public:
+    explicit BlockConnection();
+
+    bool mouseMoveEvent(QMouseEvent *) override;
+
+    void draw(QPainter &) override;
+
+    void init(Block* parent);
+
 signals:
 
 private:
@@ -21,7 +28,6 @@ private:
     QPointF mEndPoint;
 
     QPainterPath mPath;
-
 };
 
 #endif // BLOCKCONNECTION_HPP

@@ -2,16 +2,22 @@
 
 
 
-GraphicElementBase::GraphicElementBase(float x, float y, float w, float h, QObject *parent)
-    : InputListener(parent), mRect(x,y,w,h) {}
+GraphicElementBase::GraphicElementBase(float x, float y, float w, float h, GraphicElementBase *parent)
+    : InputListener(parent), mRect(x,y,w,h), mParent(parent) {}
+
+GraphicElementBase::~GraphicElementBase()
+{
+
+}
 
 bool GraphicElementBase::mouseMoveEvent(QMouseEvent *event) {
+    mHovered = mRect.contains(event->pos());
+
     for(int i = 0; i < mChildren.size(); i++) {
         if (mChildren[i]->mouseMoveEvent(event))
             return true; // if child handled - interrupt
     }
 
-    mHovered = mRect.contains(event->pos());
     return false; // ok, we did nothing yet
 }
 

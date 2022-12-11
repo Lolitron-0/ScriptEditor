@@ -7,7 +7,7 @@ QColor Block::fillColor = QColor(Qt::red).darker(100);
 
 Block::Block(float x, float y)
     :GraphicElementBase(x,y,100,60), mGrabAnim(this),
-     mShadowColor(Qt::transparent)
+     mShadowColor(Qt::transparent), mPin(this)
 {
     mBotGradient.setColorAt(0,fillColor.lighter(150));
     mBotGradient.setColorAt(0.2,fillColor);
@@ -33,14 +33,19 @@ Block::Block(float x, float y)
             emit startContiniousRepaint();
     });
 
-    _addChild(&mPin);
+    //_addChild(&mPin);
+}
+
+Block::~Block()
+{
+
 }
 
 void Block::draw(QPainter &painter)
 {
     mBotGradient.setStart(mRect.bottomLeft());
     mBotGradient.setFinalStop(mRect.topLeft());
-    if (mHovered) mBotGradient.setColorAt(0, Qt::white);
+    if (mHovered) mBotGradient.setColorAt(0, fillColor.lighter(170));
     else mBotGradient.setColorAt(0, fillColor.lighter(150));
     mBrush = QBrush(mBotGradient);
     painter.setPen(Qt::transparent);
@@ -136,6 +141,11 @@ QPointF Block::getLiftUpDelta() const
 void Block::setLiftUpDelta(QPointF newLiftUpDelta)
 {
     mLiftUpDelta = newLiftUpDelta;
+}
+
+BlockConnectionPin& Block::getPin()
+{
+    return mPin;
 }
 
 QRectF Block::_getDrawRect()
