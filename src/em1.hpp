@@ -35,13 +35,17 @@ protected:
 private:
 
     void renderGraph(QPainterPath *, Graph*);
+    void _addBlock(QPoint pos);
+    void _examineUnder(QPointF pos);
+
+    Block* _getWithPendingConnection();
 
     QImage mGrid;
-    Block block;
+    QVector<std::shared_ptr<Block>> mBlocks;
     Graph* mGraph;
     Graph mTempNode;
     Graph* mCurrentNode;
-
+    //private add block method to set up connects
     QTimer mRefreshTimer;
 
 };

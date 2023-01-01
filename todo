@@ -3,6 +3,10 @@
 ☐ graph data type @started(22-11-29 13:03)
 ☐ connections&pins @started(22-11-30 12:39)
     ☐ besier connections @started(22-11-30 12:39)
-    ☐ pins @started(22-11-30 12:39)
+    ✔ pins @started(22-11-30 12:39) @done(23-01-01 03:16) @lasted(4w3d14h37m51s)
     ☐ creating/destroying connections
+        ☐ things to do on mouse release
+        ☐ new block on release
+        ☐ connecting to other
+            ☐ add to connection pull
     ☐ adding curve points

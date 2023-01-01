@@ -1,13 +1,17 @@
 #include "graphicelementbase.h"
-
+#include "QDebug"
 
 
 GraphicElementBase::GraphicElementBase(float x, float y, float w, float h, GraphicElementBase *parent)
     : InputListener(parent), mRect(x,y,w,h), mParent(parent) {}
 
-GraphicElementBase::~GraphicElementBase()
+GraphicElementBase::GraphicElementBase()
 {
 
+}
+
+GraphicElementBase::~GraphicElementBase()
+{
 }
 
 bool GraphicElementBase::mouseMoveEvent(QMouseEvent *event) {
@@ -56,10 +60,29 @@ bool GraphicElementBase::wheelEvent(QWheelEvent *event) {
 
 void GraphicElementBase::draw(QPainter &) {}
 
+GraphicElementBase *GraphicElementBase::exammineUnder(QPointF pos)
+{
+    for (int i = 0; i < mChildren.size(); i++) {
+        auto layer = mChildren[i]->exammineUnder(pos);
+        if (layer)
+            return layer;
+    }
+
+    if (mHovered)
+        return this;
+    return nullptr;
+}
+
 QRectF GraphicElementBase::getRect() const {return mRect;}
 
 void GraphicElementBase::setPosition(QPointF pos) {mRect.translate(pos-mRect.topLeft());}
 
 void GraphicElementBase::_addChild(GraphicElementBase *newChild) {
     mChildren.append(newChild);
+    //newChild->_setParent(this);
+}
+
+void GraphicElementBase::_setParent(GraphicElementBase *parent)
+{
+    mParent = parent;
 }

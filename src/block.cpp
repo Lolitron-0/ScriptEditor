@@ -6,7 +6,7 @@ QColor Block::fillColor = QColor(Qt::red).darker(100);
 
 
 Block::Block(float x, float y)
-    :GraphicElementBase(x,y,100,60), mGrabAnim(this),
+    :GraphicElementBase(x-defaultWidth/2,y-defaultHeight/2,defaultWidth,defaultHeight), mGrabAnim(this),
      mShadowColor(Qt::transparent), mPin(this)
 {
     mBotGradient.setColorAt(0,fillColor.lighter(150));
@@ -27,18 +27,41 @@ Block::Block(float x, float y)
     mGrabAnim.addAnimation(liftUpAnim);
 
     connect(&mGrabAnim, &QAnimationGroup::stateChanged, this, [this](QAbstractAnimation::State newState, QAbstractAnimation::State){
-        if (newState == QAbstractAnimation::Stopped)
+        if (newState == QAbstractAnimation::Stopped && !mGrabbed)
             emit stopContiniousRepaint();
         else if (newState == QAbstractAnimation::Running)
             emit startContiniousRepaint();
     });
 
-    //_addChild(&mPin);
+    connect(&mPin, &BlockConnectionPin::startedConnection, this, [this](){
+        this->mPendingConnection = true;
+    });
+
+    _addChild(&mPin);
+}
+
+Block::Block(const Block &b)
+    :Block(b.getRect().x(), b.getRect().y())
+{
+
 }
 
 Block::~Block()
 {
 
+}
+
+Block &Block::operator=(const Block &b)
+{
+    Block tmp(b);
+    std::swap(mRect, tmp.mRect);
+    return *this;
+}
+
+Block &Block::operator=(Block &&b)
+{
+    std::swap(mRect, b.mRect);
+    return *this;
 }
 
 void Block::draw(QPainter &painter)
@@ -146,6 +169,11 @@ void Block::setLiftUpDelta(QPointF newLiftUpDelta)
 BlockConnectionPin& Block::getPin()
 {
     return mPin;
+}
+
+bool Block::hasPendingConnection() const
+{
+    return mPendingConnection;
 }
 
 QRectF Block::_getDrawRect()

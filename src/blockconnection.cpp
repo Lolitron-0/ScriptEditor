@@ -10,6 +10,7 @@ BlockConnection::BlockConnection()
 bool BlockConnection::mouseMoveEvent(QMouseEvent *event)
 {
     mPath.clear();
+    mPath.moveTo(mStartPoint);
     mPath.lineTo(event->pos());
     return false;
 }
@@ -21,8 +22,8 @@ void BlockConnection::draw(QPainter &painter)
     painter.drawPath(mPath);
 }
 
-void BlockConnection::init(Block *parent)
+void BlockConnection::init(QPointF start)
 {
-    mPath = QPainterPath(parent->getPin().getRect().center());
-    mFrom = parent;
+    mPath = QPainterPath(start);
+    mStartPoint = start;
 }

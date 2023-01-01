@@ -11,6 +11,7 @@
 #include <QPropertyAnimation>
 #include <QSequentialAnimationGroup>
 
+
 class Block : public GraphicElementBase
 {
     Q_OBJECT
@@ -19,7 +20,11 @@ public:
     Q_PROPERTY(QPointF liftUpDelta MEMBER mLiftUpDelta READ getLiftUpDelta WRITE setLiftUpDelta)
 
     Block(float x, float y);
+    Block(const Block&);
     ~Block();
+
+    Block& operator=(const Block&);
+    Block& operator=(Block&&);
 
     void draw(QPainter& painter) override;
 
@@ -29,6 +34,7 @@ public:
     bool mouseDoubleClickEvent(QMouseEvent *event) override;
     bool mouseMoveEvent(QMouseEvent *event) override;
 
+
     const QColor &getShadowColor() const;
     void setShadowColor(const QColor &newShadowColor);
 
@@ -36,6 +42,8 @@ public:
     void setLiftUpDelta(QPointF newLiftUpDelta);
 
     BlockConnectionPin &getPin();
+
+    bool hasPendingConnection() const;
 
 signals:
     void startContiniousRepaint();
@@ -57,9 +65,13 @@ private:
 
 
     BlockConnectionPin mPin;
-    QVector<QSharedPointer<BlockConnection>> mOutputConnections;
+    QVector<std::shared_ptr<BlockConnection>> mOutputConnections;
+    bool mPendingConnection{false};
 
 private:
+    static const int defaultWidth = 100;
+    static const int defaultHeight = 60;
+
     static QColor selectionColor;
     static QColor fillColor;
     static const int roundRadius = 6;

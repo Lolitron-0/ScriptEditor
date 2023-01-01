@@ -12,7 +12,10 @@ public:
 
     explicit GraphicElementBase(float x, float y,
                            float w, float h,
-                           GraphicElementBase* parent = nullptr);
+                           GraphicElementBase* parent = new GraphicElementBase());
+    //Null object
+    explicit GraphicElementBase();
+
     ~GraphicElementBase();
 
 
@@ -25,6 +28,9 @@ public:
     //drawing is left to client as it is more likely to be in the middle of method
     virtual void draw(QPainter&);
 
+    //checks everything under given position returns null if nothing was found
+    GraphicElementBase *exammineUnder(QPointF pos);
+
     QRectF getRect() const;
 
     // Sets the position of rect's top left corner
@@ -32,11 +38,12 @@ public:
 
 protected:
     void _addChild(GraphicElementBase* newChild);
+    void _setParent(GraphicElementBase* parent);
 
     QRectF mRect;
     bool mHovered{false};
 
-    QSharedPointer<GraphicElementBase> mParent;
+    GraphicElementBase* mParent;
 
 private:
 

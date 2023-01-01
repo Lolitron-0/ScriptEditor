@@ -7,26 +7,24 @@
 
 
 Em1::Em1(QWidget *parent)
-    :QWidget(parent), block(100,200)
+    :QWidget(parent)
 {
-   setGeometry(parent->geometry());
-   setFocusPolicy(Qt::StrongFocus);
-   setMouseTracking(true);
+    setGeometry(parent->geometry());
+    setFocusPolicy(Qt::StrongFocus);
+    setMouseTracking(true);
 
-   mGraph = new Graph("ksdjgfk", QPoint(0,100));
-   mCurrentNode = mGraph;
+    mGraph = new Graph("ksdjgfk", QPoint(0,100));
+    mCurrentNode = mGraph;
 
-   mGrid = QImage(":/images/grid.jpg");
+    mGrid = QImage(":/images/grid.jpg");
 
-   connect(&block, &Block::startContiniousRepaint, this, [this]() {
-        this->mRefreshTimer.start(5);
-   });
-   connect(&block, &Block::stopContiniousRepaint, this, [this]() {
-        this->mRefreshTimer.stop();
-   });
-   connect(&mRefreshTimer, &QTimer::timeout, this, [this](){
+    mRefreshTimer.start(5);
+    connect(&mRefreshTimer, &QTimer::timeout, this, [this](){
         this->repaint();
-   });
+    });
+
+    _addBlock(QPoint(100,100));
+    _addBlock(QPoint(350,220));
 }
 
 void Em1::paintEvent(QPaintEvent*)
@@ -35,8 +33,9 @@ void Em1::paintEvent(QPaintEvent*)
 
     painter.drawImage(QPoint(), mGrid);
 
-    block.draw(painter);
-
+    for (int i = 0; i < mBlocks.size(); i++) {
+        mBlocks[i]->draw(painter);
+    }
 
     QPainterPath textPath;
     //renderGraph(&textPath, mGraph);
@@ -59,7 +58,10 @@ void Em1::mousePressEvent(QMouseEvent *event)
 {
     QWidget::mousePressEvent(event);
 
-    block.mousePressEvent(event);
+    for (int i = 0; i<mBlocks.size(); i++) {
+        if (mBlocks[i]->mousePressEvent(event))
+            return; // if someone handled we interrupt everything
+    }
     repaint();
 }
 
@@ -67,7 +69,16 @@ void Em1::mouseReleaseEvent(QMouseEvent *event)
 {
     QWidget::mouseReleaseEvent(event);
 
-    block.mouseReleaseEvent(event);
+    for (int i = 0; i<mBlocks.size(); i++) {
+        if (mBlocks[i]->mouseReleaseEvent(event)) {
+            auto blockWithPendingConnection = _getWithPendingConnection();
+            if (blockWithPendingConnection) {
+                //examine under and do things (zzz)
+            }
+
+            return; // if someone handled we interrupt everything
+        }
+    }
     repaint();
 }
 
@@ -75,7 +86,12 @@ void Em1::mouseDoubleClickEvent(QMouseEvent *event)
 {
     QWidget::mouseDoubleClickEvent(event);
 
-    block.mouseDoubleClickEvent(event);
+    for (int i = 0; i<mBlocks.size(); i++) {
+        if (mBlocks[i]->mouseDoubleClickEvent(event))
+            return; // if someone handled we interrupt everything
+    }
+
+    _addBlock(event->pos());
     repaint();
 }
 
@@ -83,8 +99,10 @@ void Em1::mouseMoveEvent(QMouseEvent *event)
 {
     QWidget::mouseMoveEvent(event);
 
-    block.mouseMoveEvent(event);
-
+    for (int i = 0; i<mBlocks.size(); i++) {
+        if (mBlocks[i]->mouseMoveEvent(event))
+            return; // if someone handled we interrupt everything
+    }
     repaint();
 }
 
@@ -102,4 +120,29 @@ void Em1::renderGraph(QPainterPath *path, Graph* current)
     for (int i = 0; i<current->children.size(); i++) {
         renderGraph(path, current->children[i]);
     }
+}
+
+void Em1::_addBlock(QPoint pos)
+{
+    auto newBlock = std::make_shared<Block>(pos.x(), pos.y());
+    /*
+    connect(&*newBlock, &Block::startContiniousRepaint, this, [this]() {
+        this->mRefreshTimer.start(5);
+        qDebug()<<"on";
+    });
+    connect(&*newBlock, &Block::stopContiniousRepaint, this, [this]() {
+        this->mRefreshTimer.stop();
+        qDebug()<<"off";
+    });
+    */
+    mBlocks.push_back(newBlock);
+}
+
+Block *Em1::_getWithPendingConnection()
+{
+    for (int i = 0; i < mBlocks.size(); i++) {
+        if (mBlocks[i]->hasPendingConnection())
+            return mBlocks[i].get();
+    }
+    return nullptr;
 }

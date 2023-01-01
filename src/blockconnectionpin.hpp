@@ -22,8 +22,11 @@ public:
 
     void draw(QPainter &) override;
 
+signals:
+    void startedConnection();
+
 private:
-    //QSharedPointer<BlockConnection> mTempConnection;
+    std::shared_ptr<BlockConnection> mTempConnection;
 
 };
 

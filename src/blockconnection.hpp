@@ -18,13 +18,12 @@ public:
 
     void draw(QPainter &) override;
 
-    void init(Block* parent);
+    void init(QPointF start);
 
 signals:
 
 private:
-    Block* mFrom;
-    Block* mTo;
+    QPointF mStartPoint;
     QPointF mEndPoint;
 
     QPainterPath mPath;
