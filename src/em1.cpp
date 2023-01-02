@@ -69,16 +69,23 @@ void Em1::mouseReleaseEvent(QMouseEvent *event)
 {
     QWidget::mouseReleaseEvent(event);
 
+    auto blockWithPendingConnection = _getWithPendingConnection();
+
+    if (blockWithPendingConnection)
+        blockWithPendingConnection->deletePendingConnection();
+
     for (int i = 0; i<mBlocks.size(); i++) {
         if (mBlocks[i]->mouseReleaseEvent(event)) {
-            auto blockWithPendingConnection = _getWithPendingConnection();
             if (blockWithPendingConnection) {
-                //examine under and do things (zzz)
+                if (mBlocks[i].get() != blockWithPendingConnection &&  // do not connect with ourselves
+                        !mBlocks[i]->alreadyConnected(blockWithPendingConnection)) {
+                    blockWithPendingConnection->connectTo(mBlocks[i].get());
+                }
             }
-
             return; // if someone handled we interrupt everything
         }
     }
+
     repaint();
 }
 
@@ -99,9 +106,10 @@ void Em1::mouseMoveEvent(QMouseEvent *event)
 {
     QWidget::mouseMoveEvent(event);
 
+    auto blockWithPendingConnection = _getWithPendingConnection();
     for (int i = 0; i<mBlocks.size(); i++) {
-        if (mBlocks[i]->mouseMoveEvent(event))
-            return; // if someone handled we interrupt everything
+        if (mBlocks[i]->mouseMoveEvent(event) && !blockWithPendingConnection)
+            return; // if someone handled we interrupt everything, do not interrupt block with pending connection
     }
     repaint();
 }
@@ -111,15 +119,6 @@ void Em1::wheelEvent(QWheelEvent *event)
     QWidget::wheelEvent(event);
     repaint();
 
-}
-
-void Em1::renderGraph(QPainterPath *path, Graph* current)
-{
-    QFont f("Consolas", 12);
-    path->addText(current->pos, f, current->line);
-    for (int i = 0; i<current->children.size(); i++) {
-        renderGraph(path, current->children[i]);
-    }
 }
 
 void Em1::_addBlock(QPoint pos)
@@ -136,6 +135,15 @@ void Em1::_addBlock(QPoint pos)
     });
     */
     mBlocks.push_back(newBlock);
+}
+
+Em1::BlockPtr Em1::_getHoveredBlock()
+{
+    for (int i = 0; i < mBlocks.size(); i++) {
+        if (mBlocks[i]->isHovered())
+            return mBlocks[i];
+    }
+    return nullptr;
 }
 
 Block *Em1::_getWithPendingConnection()

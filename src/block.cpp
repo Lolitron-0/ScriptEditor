@@ -66,6 +66,11 @@ Block &Block::operator=(Block &&b)
 
 void Block::draw(QPainter &painter)
 {
+    // connections
+    for (int i = 0; i < mOutputConnections.size(); i++) {
+        mOutputConnections[i].draw(painter);
+    }
+
     mBotGradient.setStart(mRect.bottomLeft());
     mBotGradient.setFinalStop(mRect.topLeft());
     if (mHovered) mBotGradient.setColorAt(0, fillColor.lighter(170));
@@ -95,6 +100,7 @@ void Block::draw(QPainter &painter)
         painter.setBrush(Qt::transparent);
         painter.drawRoundedRect(_getDrawRect(), roundRadius, roundRadius);
     }
+
 }
 
 bool Block::mousePressEvent(QMouseEvent *event)
@@ -144,6 +150,38 @@ bool Block::mouseMoveEvent(QMouseEvent *event)
     return mHovered;
 }
 
+void Block::connectTo(Block *block)
+{
+    BlockConnection newConnection(this, block);
+    mOutputConnections.append(newConnection);
+    mPin.finishConnection();
+    //_addChild(&newConnection);
+    mPendingConnection = false;
+}
+
+void Block::deletePendingConnection()
+{
+    mPin.finishConnection();
+    mPendingConnection = false;
+}
+
+bool Block::alreadyConnected(Block *b)
+{
+    // other with this
+    for (int i = 0; i < b->mOutputConnections.size(); i++) {
+        if (b->mOutputConnections[i].to() == this)
+            return true;
+    }
+
+    // this with other
+    for (int i = 0; i < mOutputConnections.size(); i++) {
+        if (mOutputConnections[i].to() == b)
+            return true;
+    }
+
+    return false;
+}
+
 const QColor &Block::getShadowColor() const
 {
     return mShadowColor;
@@ -169,6 +207,11 @@ void Block::setLiftUpDelta(QPointF newLiftUpDelta)
 BlockConnectionPin& Block::getPin()
 {
     return mPin;
+}
+
+QPointF Block::getPinCenter()
+{
+    return mPin.getRect().center();
 }
 
 bool Block::hasPendingConnection() const

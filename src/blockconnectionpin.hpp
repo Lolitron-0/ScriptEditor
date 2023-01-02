@@ -11,6 +11,7 @@
 
 class BlockConnectionPin : public GraphicElementBase
 {
+    Q_OBJECT
 public:
     BlockConnectionPin(Block *parent = nullptr);
 
@@ -21,6 +22,9 @@ public:
     bool mouseMoveEvent(QMouseEvent *) override;
 
     void draw(QPainter &) override;
+
+    //finishes pending connection
+    void finishConnection();
 
 signals:
     void startedConnection();

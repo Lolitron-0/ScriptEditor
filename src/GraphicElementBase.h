@@ -32,6 +32,7 @@ public:
     GraphicElementBase *exammineUnder(QPointF pos);
 
     QRectF getRect() const;
+    bool isHovered() const;
 
     // Sets the position of rect's top left corner
     void setPosition(QPointF pos);

@@ -2,7 +2,7 @@
 #include "block.hpp"
 
 #include <QPainter>
-#include <Qdebug>
+#include <QDebug>
 
 BlockConnectionPin::BlockConnectionPin(Block *parent)
     :GraphicElementBase(0,0,15,15, parent)
@@ -14,8 +14,7 @@ bool BlockConnectionPin::mousePressEvent(QMouseEvent *event)
     GraphicElementBase::mousePressEvent(event);
 
     if (mHovered) {
-        mTempConnection.reset(new BlockConnection());
-        mTempConnection->init(static_cast<Block*>(mParent)->getPin().getRect().center()); //we guarantee that our parent is Block
+        mTempConnection.reset(new BlockConnection(static_cast<Block*>(mParent))); //we guarantee that our parent is Block
         emit startedConnection();
     }
 
@@ -57,5 +56,10 @@ void BlockConnectionPin::draw(QPainter &painter)
     painter.drawEllipse(mRect.center(), 5,5);
     if (mTempConnection.get())
         mTempConnection->draw(painter);
+}
+
+void BlockConnectionPin::finishConnection()
+{
+    mTempConnection.reset();
 }
 

@@ -22,6 +22,8 @@ class Em1 : public QWidget
 public:
     Em1(QWidget* parent = nullptr);
 
+    typedef std::shared_ptr<Block> BlockPtr;
+
 protected:
     void paintEvent(QPaintEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
@@ -34,9 +36,9 @@ protected:
 
 private:
 
-    void renderGraph(QPainterPath *, Graph*);
     void _addBlock(QPoint pos);
     void _examineUnder(QPointF pos);
+    BlockPtr _getHoveredBlock();
 
     Block* _getWithPendingConnection();
 

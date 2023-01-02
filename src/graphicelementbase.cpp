@@ -75,6 +75,11 @@ GraphicElementBase *GraphicElementBase::exammineUnder(QPointF pos)
 
 QRectF GraphicElementBase::getRect() const {return mRect;}
 
+bool GraphicElementBase::isHovered() const
+{
+    return mHovered;
+}
+
 void GraphicElementBase::setPosition(QPointF pos) {mRect.translate(pos-mRect.topLeft());}
 
 void GraphicElementBase::_addChild(GraphicElementBase *newChild) {

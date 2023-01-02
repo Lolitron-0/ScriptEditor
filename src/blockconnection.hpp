@@ -6,27 +6,33 @@
 
 #include <QObject>
 #include <QPainterPath>
+#include <QPen>
 
 class Block;
 
 class BlockConnection : public GraphicElementBase
 {
 public:
-    explicit BlockConnection();
+    explicit BlockConnection(Block* start);
+    explicit BlockConnection(Block* start, Block* end);
+    BlockConnection(const BlockConnection& b);
 
     bool mouseMoveEvent(QMouseEvent *) override;
 
     void draw(QPainter &) override;
 
-    void init(QPointF start);
+    Block* to();
+    Block* from();
 
-signals:
+    BlockConnection& operator=(const BlockConnection& b);
+    BlockConnection& operator=(BlockConnection&& b);
 
 private:
-    QPointF mStartPoint;
-    QPointF mEndPoint;
+    Block* mFrom;
+    Block* mTo;
 
     QPainterPath mPath;
+    QPen mPen;
 };
 
 #endif // BLOCKCONNECTION_HPP
