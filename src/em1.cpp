@@ -17,6 +17,7 @@ Em1::Em1(QWidget *parent)
     mCurrentNode = mGraph;
 
     mGrid = QImage(":/images/grid.jpg");
+    mGrid.setDevicePixelRatio(2);
 
     mRefreshTimer.start(5);
     connect(&mRefreshTimer, &QTimer::timeout, this, [this](){
@@ -57,6 +58,9 @@ void Em1::keyPressEvent(QKeyEvent *event)
 void Em1::mousePressEvent(QMouseEvent *event)
 {
     QWidget::mousePressEvent(event);
+
+    for (int i = 0; i<mBlocks.size(); i++) // deselect all
+        mBlocks[i]->setSelected(false);
 
     for (int i = 0; i<mBlocks.size(); i++) {
         if (mBlocks[i]->mousePressEvent(event))

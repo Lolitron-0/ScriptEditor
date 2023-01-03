@@ -155,8 +155,18 @@ void Block::connectTo(Block *block)
     BlockConnection newConnection(this, block);
     mOutputConnections.append(newConnection);
     mPin.finishConnection();
-    //_addChild(&newConnection);
+    _addChild(&mOutputConnections.last());
     mPendingConnection = false;
+}
+
+void Block::disconnectFrom(Block *block)
+{
+    for (int i = 0; i < mOutputConnections.size(); i++) {
+        if (mOutputConnections[i].to() == block) {
+            _removeChild(&mOutputConnections[i]);
+            mOutputConnections.remove(i);
+        }
+    }
 }
 
 void Block::deletePendingConnection()
@@ -194,6 +204,16 @@ void Block::setShadowColor(const QColor &newShadowColor)
     mShadowColor = newShadowColor;
 }
 
+bool Block::isSelected() const
+{
+    return mSelected;
+}
+
+void Block::setSelected(bool b)
+{
+    mSelected = false;
+}
+
 QPointF Block::getLiftUpDelta() const
 {
     return mLiftUpDelta;
@@ -209,7 +229,7 @@ BlockConnectionPin& Block::getPin()
     return mPin;
 }
 
-QPointF Block::getPinCenter()
+QPointF Block::getPinCenter() const
 {
     return mPin.getRect().center();
 }

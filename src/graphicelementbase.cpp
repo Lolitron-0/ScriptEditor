@@ -84,7 +84,16 @@ void GraphicElementBase::setPosition(QPointF pos) {mRect.translate(pos-mRect.top
 
 void GraphicElementBase::_addChild(GraphicElementBase *newChild) {
     mChildren.append(newChild);
-    //newChild->_setParent(this);
+    newChild->_setParent(this);
+}
+
+void GraphicElementBase::_removeChild(GraphicElementBase *child)
+{
+    for (int i = 0; i < mChildren.size(); i++) {
+        if (mChildren[i] == child) {
+            mChildren.remove(i);
+        }
+    }
 }
 
 void GraphicElementBase::_setParent(GraphicElementBase *parent)

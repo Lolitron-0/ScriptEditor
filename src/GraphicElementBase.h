@@ -39,6 +39,7 @@ public:
 
 protected:
     void _addChild(GraphicElementBase* newChild);
+    void _removeChild(GraphicElementBase* child);
     void _setParent(GraphicElementBase* parent);
 
     QRectF mRect;

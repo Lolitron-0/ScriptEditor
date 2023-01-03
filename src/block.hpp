@@ -35,6 +35,7 @@ public:
     bool mouseMoveEvent(QMouseEvent *event) override;
 
     void connectTo(Block* block);
+    void disconnectFrom(Block* block);
     void deletePendingConnection();
     // checks if this block is connected to the other and vice versa
     bool alreadyConnected(Block*);
@@ -42,11 +43,14 @@ public:
     const QColor &getShadowColor() const;
     void setShadowColor(const QColor &newShadowColor);
 
+    bool isSelected() const;
+    void setSelected(bool b);
+
     QPointF getLiftUpDelta() const;
     void setLiftUpDelta(QPointF newLiftUpDelta);
 
     BlockConnectionPin &getPin();
-    QPointF getPinCenter();
+    QPointF getPinCenter() const;
     bool hasPendingConnection() const;
 
 signals:

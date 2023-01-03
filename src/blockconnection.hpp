@@ -18,6 +18,7 @@ public:
     BlockConnection(const BlockConnection& b);
 
     bool mouseMoveEvent(QMouseEvent *) override;
+    bool mousePressEvent(QMouseEvent *) override;
 
     void draw(QPainter &) override;
 
@@ -33,6 +34,7 @@ private:
 
     QPainterPath mPath;
     QPen mPen;
+
 };
 
 #endif // BLOCKCONNECTION_HPP
