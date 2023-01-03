@@ -2,11 +2,12 @@
 ✔ pretty grab anim @started(22-11-28 00:05) @done(22-11-29 12:52) @lasted(1d12h47m5s)
 ☐ graph data type @started(22-11-29 13:03)
 ☐ connections&pins @started(22-11-30 12:39)
-    ☐ besier connections @started(22-11-30 12:39)
+    ✔ cubic connections @done(23-01-03 03:03)
     ✔ pins @started(22-11-30 12:39) @done(23-01-01 03:16) @lasted(4w3d14h37m51s)
-    ☐ creating/destroying connections
-        ☐ things to do on mouse release
+    ☐ creating/destroying connections @started(23-01-03 01:13)
         ☐ new block on release
-        ☐ connecting to other
-            ☐ add to connection pull
+        ☐ connection hover detect
+        ✔ connecting to other @done(23-01-03 01:13)
+            ✔ add to connection pull @done(23-01-03 01:13)
     ☐ adding curve points
+
