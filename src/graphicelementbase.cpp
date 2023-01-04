@@ -18,7 +18,8 @@ bool GraphicElementBase::mouseMoveEvent(QMouseEvent *event) {
     mHovered = mRect.contains(event->pos());
 
     for(int i = 0; i < mChildren.size(); i++) {
-        if (mChildren[i]->mouseMoveEvent(event))
+        if (!mChildren[i]->mSkipSystemHandling &&
+                mChildren[i]->mouseMoveEvent(event))
             return true; // if child handled - interrupt
     }
 
@@ -27,7 +28,8 @@ bool GraphicElementBase::mouseMoveEvent(QMouseEvent *event) {
 
 bool GraphicElementBase::mousePressEvent(QMouseEvent *event) {
     for(int i = 0; i < mChildren.size(); i++) {
-        if (mChildren[i]->mousePressEvent(event))
+        if (!mChildren[i]->mSkipSystemHandling &&
+                mChildren[i]->mousePressEvent(event))
             return true; // if child handled - interrupt
     }
 
@@ -36,7 +38,8 @@ bool GraphicElementBase::mousePressEvent(QMouseEvent *event) {
 
 bool GraphicElementBase::mouseReleaseEvent(QMouseEvent *event) {
     for(int i = 0; i < mChildren.size(); i++) {
-        if (mChildren[i]->mouseReleaseEvent(event))
+        if (!mChildren[i]->mSkipSystemHandling &&
+                mChildren[i]->mouseReleaseEvent(event))
             return true; // if child handled - interrupt
     }
     return false;
@@ -44,7 +47,8 @@ bool GraphicElementBase::mouseReleaseEvent(QMouseEvent *event) {
 
 bool GraphicElementBase::mouseDoubleClickEvent(QMouseEvent *event) {
     for(int i = 0; i < mChildren.size(); i++) {
-        if (mChildren[i]->mouseDoubleClickEvent(event))
+        if (!mChildren[i]->mSkipSystemHandling &&
+                mChildren[i]->mouseDoubleClickEvent(event))
             return true; // if child handled - interrupt
     }
     return false;
@@ -52,12 +56,14 @@ bool GraphicElementBase::mouseDoubleClickEvent(QMouseEvent *event) {
 
 bool GraphicElementBase::wheelEvent(QWheelEvent *event) {
     for(int i = 0; i < mChildren.size(); i++) {
-        if (mChildren[i]->wheelEvent(event))
+        if (!mChildren[i]->mSkipSystemHandling &&
+                mChildren[i]->wheelEvent(event))
             return true; // if child handled - interrupt
     }
     return false;
 }
 
+// inheritor manages drawing of his children by his own
 void GraphicElementBase::draw(QPainter &) {}
 
 GraphicElementBase *GraphicElementBase::exammineUnder(QPointF pos)
@@ -78,6 +84,16 @@ QRectF GraphicElementBase::getRect() const {return mRect;}
 bool GraphicElementBase::isHovered() const
 {
     return mHovered;
+}
+
+bool GraphicElementBase::doSkipSystemHandling() const
+{
+    return mSkipSystemHandling;
+}
+
+void GraphicElementBase::setSkipSystemHandling(bool b)
+{
+    mSkipSystemHandling = b;
 }
 
 void GraphicElementBase::setPosition(QPointF pos) {mRect.translate(pos-mRect.topLeft());}

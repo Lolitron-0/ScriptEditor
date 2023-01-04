@@ -34,6 +34,9 @@ public:
     QRectF getRect() const;
     bool isHovered() const;
 
+    bool doSkipSystemHandling() const;
+    void setSkipSystemHandling(bool b);
+
     // Sets the position of rect's top left corner
     void setPosition(QPointF pos);
 
@@ -44,6 +47,8 @@ protected:
 
     QRectF mRect;
     bool mHovered{false};
+    // some elements need to be proceeded by hand (i.e. front line)
+    bool mSkipSystemHandling{false};
 
     GraphicElementBase* mParent;
 

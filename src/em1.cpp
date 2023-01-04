@@ -1,4 +1,5 @@
 #include "em1.hpp"
+#include "qlayout.h"
 
 #include <QKeyEvent>
 #include <QPainter>
@@ -12,9 +13,6 @@ Em1::Em1(QWidget *parent)
     setGeometry(parent->geometry());
     setFocusPolicy(Qt::StrongFocus);
     setMouseTracking(true);
-
-    mGraph = new Graph("ksdjgfk", QPoint(0,100));
-    mCurrentNode = mGraph;
 
     mGrid = QImage(":/images/grid.jpg");
     mGrid.setDevicePixelRatio(2);
@@ -38,20 +36,19 @@ void Em1::paintEvent(QPaintEvent*)
         mBlocks[i]->draw(painter);
     }
 
-    QPainterPath textPath;
-    //renderGraph(&textPath, mGraph);
-    painter.drawPath(textPath);
+    for (int i = 0; i < mBlocks.size(); i++) {
+        mBlocks[i]->drawFrontObjects(painter);
+    }
 }
 
 void Em1::keyPressEvent(QKeyEvent *event)
 {
-    if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
-        mTempNode.pos = QPoint(0,mCurrentNode->pos.y()+10);
-        mCurrentNode->children.append(new Graph(mTempNode));
-        mTempNode = Graph();
+    if (event->key() == Qt::Key::Key_Delete) {
+        auto selected = _getSelectedBlockIndex();
+        if (selected != -1)
+            _deleteBlockAt(selected);
     }
     else {
-        mTempNode.line.append(event->text());
     }
 }
 
@@ -63,9 +60,18 @@ void Em1::mousePressEvent(QMouseEvent *event)
         mBlocks[i]->setSelected(false);
 
     for (int i = 0; i<mBlocks.size(); i++) {
-        if (mBlocks[i]->mousePressEvent(event))
+        if (mBlocks[i]->mousePressEvent(event)) {
+            if (event->button() == Qt::MouseButton::RightButton) {
+                _deleteBlockAt(i);
+            }
             return; // if someone handled we interrupt everything
+        }
     }
+
+    //front line
+    for (int i = 0; i<mBlocks.size(); i++)
+        mBlocks[i]->processFrontLine(InputListener::EventType::MousePress, event);
+
     repaint();
 }
 
@@ -90,6 +96,15 @@ void Em1::mouseReleaseEvent(QMouseEvent *event)
         }
     }
 
+    if (blockWithPendingConnection) { // failed to connect
+        _addBlock(event->pos());
+        blockWithPendingConnection->connectTo(mBlocks.last().get());
+    }
+
+    //front line
+    for (int i = 0; i<mBlocks.size(); i++)
+        mBlocks[i]->processFrontLine(InputListener::EventType::MouseRelease, event);
+
     repaint();
 }
 
@@ -102,6 +117,10 @@ void Em1::mouseDoubleClickEvent(QMouseEvent *event)
             return; // if someone handled we interrupt everything
     }
 
+    //front line
+    for (int i = 0; i<mBlocks.size(); i++)
+        mBlocks[i]->processFrontLine(InputListener::EventType::MouseDoubleClick, event);
+
     _addBlock(event->pos());
     repaint();
 }
@@ -112,9 +131,16 @@ void Em1::mouseMoveEvent(QMouseEvent *event)
 
     auto blockWithPendingConnection = _getWithPendingConnection();
     for (int i = 0; i<mBlocks.size(); i++) {
-        if (mBlocks[i]->mouseMoveEvent(event) && !blockWithPendingConnection)
+        if (mBlocks[i]->mouseMoveEvent(event) &&
+                !blockWithPendingConnection &&
+                mBlocks[i]->isSelected()) // priority to selected
             return; // if someone handled we interrupt everything, do not interrupt block with pending connection
     }
+
+    //front line
+    for (int i = 0; i<mBlocks.size(); i++)
+        mBlocks[i]->processFrontLine(InputListener::EventType::MouseMove, event);
+
     repaint();
 }
 
@@ -138,7 +164,19 @@ void Em1::_addBlock(QPoint pos)
         qDebug()<<"off";
     });
     */
+    newBlock->setTextEditPtr(std::make_shared<QTextEdit>(this)); // due to my stupidness we need to init QWidgets outside
     mBlocks.push_back(newBlock);
+}
+
+void Em1::_deleteBlockAt(int index)
+{
+    for (int i = 0; i < mBlocks.size(); i++) {
+        if (i != index) {
+            mBlocks[i]->disconnectFrom(mBlocks[index].get());
+        }
+    }
+
+    mBlocks.remove(index);
 }
 
 Em1::BlockPtr Em1::_getHoveredBlock()
@@ -148,6 +186,15 @@ Em1::BlockPtr Em1::_getHoveredBlock()
             return mBlocks[i];
     }
     return nullptr;
+}
+
+int Em1::_getSelectedBlockIndex()
+{
+    for (int i = 0; i < mBlocks.size(); i++) {
+        if (mBlocks[i]->isSelected())
+            return i;
+    }
+    return -1;
 }
 
 Block *Em1::_getWithPendingConnection()

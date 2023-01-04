@@ -5,17 +5,6 @@
 #include <QTimer>
 #include <QWidget>
 
-struct Graph {
-    Graph() = default;
-    Graph(QString line, QPoint pos)
-        :line(line), pos(pos)
-    {
-    }
-
-    QVector<Graph*> children;
-    QString line;
-    QPoint pos;
-};
 
 class Em1 : public QWidget
 {
@@ -37,16 +26,19 @@ protected:
 private:
 
     void _addBlock(QPoint pos);
+    //deletes block with given index
+    void _deleteBlockAt(int index);
     void _examineUnder(QPointF pos);
     BlockPtr _getHoveredBlock();
+    // returns selected block index, -1 if none selected
+    int _getSelectedBlockIndex();
 
     Block* _getWithPendingConnection();
 
     QImage mGrid;
     QVector<std::shared_ptr<Block>> mBlocks;
-    Graph* mGraph;
-    Graph mTempNode;
-    Graph* mCurrentNode;
+    QTextEdit edit;
+
     //private add block method to set up connects
     QTimer mRefreshTimer;
 

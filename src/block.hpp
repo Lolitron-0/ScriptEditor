@@ -10,6 +10,7 @@
 #include <QParallelAnimationGroup>
 #include <QPropertyAnimation>
 #include <QSequentialAnimationGroup>
+#include <QTextEdit>
 
 
 class Block : public GraphicElementBase
@@ -27,8 +28,11 @@ public:
     Block& operator=(Block&&);
 
     void draw(QPainter& painter) override;
+    // used to draw some objects that should always be on top (i. e. connections)
+    void drawFrontObjects(QPainter& painter);
 
 public:
+
     bool mousePressEvent(QMouseEvent *event) override;
     bool mouseReleaseEvent(QMouseEvent *event) override;
     bool mouseDoubleClickEvent(QMouseEvent *event) override;
@@ -39,6 +43,8 @@ public:
     void deletePendingConnection();
     // checks if this block is connected to the other and vice versa
     bool alreadyConnected(Block*);
+    // processes front line elements (all-in-one)
+    void processFrontLine(InputListener::EventType type, QMouseEvent* );
 
     const QColor &getShadowColor() const;
     void setShadowColor(const QColor &newShadowColor);
@@ -52,6 +58,9 @@ public:
     BlockConnectionPin &getPin();
     QPointF getPinCenter() const;
     bool hasPendingConnection() const;
+
+    std::shared_ptr<QTextEdit> getTextEditPtr() const;
+    void setTextEditPtr(const std::shared_ptr<QTextEdit>&);
 
 signals:
     void startContiniousRepaint();
@@ -73,12 +82,19 @@ private:
 
 
     BlockConnectionPin mPin;
-    QVector<BlockConnection> mOutputConnections;
+    QVector<std::shared_ptr<BlockConnection>> mOutConnections;
     bool mPendingConnection{false};
 
+    // contents
+    std::shared_ptr<QTextEdit> mEdit;
+    QPainterPath mTitlePath;
+    QFont mTextFont;
+    QFont mTextEditFont;
+    QString mTitle;
+
 private:
-    static const int defaultWidth = 100;
-    static const int defaultHeight = 60;
+    static const int defaultWidth = 200;
+    static const int defaultHeight = 100;
 
     static QColor selectionColor;
     static QColor fillColor;

@@ -1,13 +1,29 @@
 ✔ signals to on/off continious repaint @started(22-11-29 12:52) @done(22-11-29 13:03) @lasted(11m9s)
 ✔ pretty grab anim @started(22-11-28 00:05) @done(22-11-29 12:52) @lasted(1d12h47m5s)
-☐ graph data type @started(22-11-29 13:03)
+✘ graph data type @started(22-11-29 13:03) @cancelled(23-01-04 01:52) @wasted(5w12h49m36s)
 ☐ connections&pins @started(22-11-30 12:39)
     ✔ cubic connections @done(23-01-03 03:03)
     ✔ pins @started(22-11-30 12:39) @done(23-01-01 03:16) @lasted(4w3d14h37m51s)
-    ☐ creating/destroying connections @started(23-01-03 01:13)
-        ☐ new block on release
-        ☐ connection hover detect
+    ✔ creating/destroying connections @started(23-01-03 01:13) @done(23-01-04 00:33) @lasted(23h20m14s)
+        ✔ new block on release @done(23-01-04 00:33)
+        ✔ connection hover detect @done(23-01-04 00:33)
         ✔ connecting to other @done(23-01-03 01:13)
             ✔ add to connection pull @done(23-01-03 01:13)
+        ✔ proper event handling (after everyone) @started(23-01-04 00:33) @done(23-01-04 01:52) @lasted(1h19m10s)
     ☐ adding curve points
+✔ blocks contents @started(23-01-04 01:55) @done(23-01-04 22:53) @lasted(20h58m)
+    ✔ textbox @done(23-01-04 22:53)
+☐ UI
+    ☐ font change
+    ☐ preview
+☐ save/load
+☐ cmon, make a fucking game
+    ☐ ui
+    ☐ exporting a binary (??)
+☐ other block types
+    ☐ sound
+    ☐ change plank
+    ☐ change bg
+    ☐ transitions
+    ☐ animations (damn)
 

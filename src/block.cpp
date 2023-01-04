@@ -1,13 +1,13 @@
 #include "block.hpp"
 #include <QDebug>
 
-QColor Block::selectionColor = QColor(Qt::green).darker(100);
-QColor Block::fillColor = QColor(Qt::red).darker(100);
+QColor Block::selectionColor = QColor(Qt::yellow).darker(100);
+QColor Block::fillColor = QColor(252,50,50);
 
 
 Block::Block(float x, float y)
     :GraphicElementBase(x-defaultWidth/2,y-defaultHeight/2,defaultWidth,defaultHeight), mGrabAnim(this),
-     mShadowColor(Qt::transparent), mPin(this)
+     mShadowColor(Qt::transparent), mPin(this), mTextFont("Consolas"), mTitle("Story")
 {
     mBotGradient.setColorAt(0,fillColor.lighter(150));
     mBotGradient.setColorAt(0.2,fillColor);
@@ -38,6 +38,12 @@ Block::Block(float x, float y)
     });
 
     _addChild(&mPin);
+
+    mTextFont.setPixelSize(15);
+    mTextFont.setBold(true);
+    // text edit setup is in it's set method
+    mTextEditFont.setFamily("Consolas");
+    mTextEditFont.setPointSize(8);
 }
 
 Block::Block(const Block &b)
@@ -66,14 +72,9 @@ Block &Block::operator=(Block &&b)
 
 void Block::draw(QPainter &painter)
 {
-    // connections
-    for (int i = 0; i < mOutputConnections.size(); i++) {
-        mOutputConnections[i].draw(painter);
-    }
-
-    mBotGradient.setStart(mRect.bottomLeft());
-    mBotGradient.setFinalStop(mRect.topLeft());
-    if (mHovered) mBotGradient.setColorAt(0, fillColor.lighter(170));
+    mBotGradient.setStart(_getDrawRect().bottomLeft());
+    mBotGradient.setFinalStop(_getDrawRect().topLeft());
+    if (mHovered) mBotGradient.setColorAt(0, fillColor.lighter(200));
     else mBotGradient.setColorAt(0, fillColor.lighter(150));
     mBrush = QBrush(mBotGradient);
     painter.setPen(Qt::transparent);
@@ -89,9 +90,35 @@ void Block::draw(QPainter &painter)
     //shifting pin properly
     mPin.setPosition(_getDrawRect().topRight()-
                      QPointF( //offset
-                         mPin.getRect().width() + 5, //magic number whatever
+                         mPin.getRect().width() + 5, //random number whatever
                          -_getDrawRect().height()/2 + mPin.getRect().height()/2));
     mPin.draw(painter);
+
+    //contents
+
+    auto letterSize = mTextFont.pixelSize();
+    auto contentCorner = QPoint(_getDrawRect().left()+letterSize/2,
+                                _getDrawRect().top()+ 2 * letterSize); //including title
+
+    painter.setPen(Qt::transparent);
+    mTitlePath.clear();
+    mTitlePath.addText(QPoint(_getDrawRect().center().x() - letterSize/2 * mTitle.length()/2,
+                              _getDrawRect().top() + letterSize),
+                       mTextFont, mTitle);
+    painter.setPen(Qt::black);
+    painter.drawLine(
+                    QPoint(contentCorner.x(), _getDrawRect().top() + 1.5 * letterSize),
+                    QPoint(_getDrawRect().right() - letterSize/2, _getDrawRect().top() + 1.5 * letterSize));
+    painter.setBrush(Qt::black);
+    painter.setPen(Qt::black);
+    painter.drawPath(mTitlePath);
+
+
+    mEdit->setGeometry(contentCorner.x(),
+                      contentCorner.y(),
+                      mPin.getRect().left() - _getDrawRect().left() - letterSize/2 - 5,
+                      _getDrawRect().bottom()-contentCorner.y() - letterSize/2
+                );
 
     if(mSelected){ //sel outline
         auto pen =  QPen(selectionColor);
@@ -101,6 +128,14 @@ void Block::draw(QPainter &painter)
         painter.drawRoundedRect(_getDrawRect(), roundRadius, roundRadius);
     }
 
+}
+
+void Block::drawFrontObjects(QPainter &painter)
+{
+    // connections
+    for (int i = 0; i < mOutConnections.size(); i++) {
+        mOutConnections[i]->draw(painter);
+    }
 }
 
 bool Block::mousePressEvent(QMouseEvent *event)
@@ -152,19 +187,19 @@ bool Block::mouseMoveEvent(QMouseEvent *event)
 
 void Block::connectTo(Block *block)
 {
-    BlockConnection newConnection(this, block);
-    mOutputConnections.append(newConnection);
+    mOutConnections.append(std::make_shared<BlockConnection>(this, block));
+    mOutConnections.last()->setSkipSystemHandling(true); // we want to process them ourselves by hand
     mPin.finishConnection();
-    _addChild(&mOutputConnections.last());
+    _addChild(mOutConnections.last().get());
     mPendingConnection = false;
 }
 
 void Block::disconnectFrom(Block *block)
 {
-    for (int i = 0; i < mOutputConnections.size(); i++) {
-        if (mOutputConnections[i].to() == block) {
-            _removeChild(&mOutputConnections[i]);
-            mOutputConnections.remove(i);
+    for (int i = 0; i < mOutConnections.size(); i++) {
+        if (mOutConnections[i]->to() == block) {
+            _removeChild(mOutConnections[i].get());
+            mOutConnections.remove(i);
         }
     }
 }
@@ -178,18 +213,40 @@ void Block::deletePendingConnection()
 bool Block::alreadyConnected(Block *b)
 {
     // other with this
-    for (int i = 0; i < b->mOutputConnections.size(); i++) {
-        if (b->mOutputConnections[i].to() == this)
+    for (int i = 0; i < b->mOutConnections.size(); i++) {
+        if (b->mOutConnections[i]->to() == this)
             return true;
     }
 
     // this with other
-    for (int i = 0; i < mOutputConnections.size(); i++) {
-        if (mOutputConnections[i].to() == b)
+    for (int i = 0; i < mOutConnections.size(); i++) {
+        if (mOutConnections[i]->to() == b)
             return true;
     }
 
     return false;
+}
+
+void Block::processFrontLine(EventType type, QMouseEvent* event)
+{
+    for (int i = 0; i < mOutConnections.size(); i++) {
+        switch (type) {
+        case InputListener::EventType::MouseMove:
+            mOutConnections[i]->mouseMoveEvent(event);
+            break;
+        case InputListener::EventType::MousePress:
+            mOutConnections[i]->mousePressEvent(event);
+            break;
+        case InputListener::EventType::MouseRelease:
+            mOutConnections[i]->mouseReleaseEvent(event);
+            break;
+        case InputListener::EventType::MouseDoubleClick:
+            mOutConnections[i]->mouseDoubleClickEvent(event);
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 const QColor &Block::getShadowColor() const
@@ -211,7 +268,7 @@ bool Block::isSelected() const
 
 void Block::setSelected(bool b)
 {
-    mSelected = false;
+    mSelected = b;
 }
 
 QPointF Block::getLiftUpDelta() const
@@ -237,6 +294,26 @@ QPointF Block::getPinCenter() const
 bool Block::hasPendingConnection() const
 {
     return mPendingConnection;
+}
+
+std::shared_ptr<QTextEdit> Block::getTextEditPtr() const
+{
+    return mEdit;
+}
+
+void Block::setTextEditPtr(const std::shared_ptr<QTextEdit> &newPtr)
+{
+    mEdit = newPtr;
+    mEdit->setFontFamily("Consolas");
+    mEdit->setStyleSheet(QString::fromUtf8(R"STYLE(
+QTextEdit {
+    background-color: rgba(50,50,50,50);
+    border-radius: 6px;
+    color: white;
+}
+)STYLE"));
+    mEdit->setFont(mTextEditFont);
+    mEdit->setVisible(true);
 }
 
 QRectF Block::_getDrawRect()

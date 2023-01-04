@@ -8,6 +8,16 @@ class InputListener : public QObject
 {
     Q_OBJECT
 public:
+
+    enum class EventType {
+        MouseMove,
+        MousePress,
+        MouseRelease,
+        MouseDoubleClick,
+        Wheel
+    };
+
+
     explicit InputListener(QObject *parent = nullptr) :QObject(parent) {}
     InputListener(const InputListener&)
     {

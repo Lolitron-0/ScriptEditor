@@ -29,12 +29,16 @@ public:
     BlockConnection& operator=(BlockConnection&& b);
 
 private:
+    float _isHovered(QPoint point) const;
+
     Block* mFrom;
     Block* mTo;
 
     QPainterPath mPath;
     QPen mPen;
 
+    static const int hoverDistance = 10;
+    static QColor connectionColor;
 };
 
 #endif // BLOCKCONNECTION_HPP
