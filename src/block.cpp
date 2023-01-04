@@ -79,22 +79,24 @@ void Block::draw(QPainter &painter)
     mBrush = QBrush(mBotGradient);
     painter.setPen(Qt::transparent);
 
-    //shadow
+    // shadow
     painter.setBrush(mShadowColor);
     painter.drawRoundedRect(mRect, roundRadius, roundRadius);
 
+    // body
+    painter.setPen(Qt::black);
     painter.setBrush(mBrush);
     painter.drawRoundedRect(
                 _getDrawRect(), roundRadius, roundRadius);
 
-    //shifting pin properly
+    // shifting pin properly
     mPin.setPosition(_getDrawRect().topRight()-
-                     QPointF( //offset
-                         mPin.getRect().width() + 5, //random number whatever
+                     QPointF( // offset
+                         mPin.getRect().width() + 5, // random number whatever
                          -_getDrawRect().height()/2 + mPin.getRect().height()/2));
     mPin.draw(painter);
 
-    //contents
+    // contents
 
     auto letterSize = mTextFont.pixelSize();
     auto contentCorner = QPoint(_getDrawRect().left()+letterSize/2,
@@ -142,7 +144,7 @@ bool Block::mousePressEvent(QMouseEvent *event)
 {
     if (GraphicElementBase::mousePressEvent(event)) return true;
 
-    if (mHovered){
+    if (mHovered && event->button() == Qt::MouseButton::LeftButton) {
         mGrabbed = true;
         mSelected = true;
         mGrabAnim.setDirection(QAnimationGroup::Forward);
@@ -150,8 +152,6 @@ bool Block::mousePressEvent(QMouseEvent *event)
         mGrabDelta = event->pos() - mRect.topLeft();
         return true;
     }
-    else
-        mSelected = false;
     return false;
 }
 
@@ -183,6 +183,18 @@ bool Block::mouseMoveEvent(QMouseEvent *event)
     }
 
     return mHovered;
+}
+
+void Block::grab(QPoint pos)
+{
+        mGrabbed = true;
+        mGrabDelta = pos - mRect.topLeft();
+}
+
+void Block::release()
+{
+    mGrabbed = false;
+    mGrabDelta = QPointF(0.,0.);
 }
 
 void Block::connectTo(Block *block)

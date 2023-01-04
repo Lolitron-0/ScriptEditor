@@ -98,6 +98,11 @@ void GraphicElementBase::setSkipSystemHandling(bool b)
 
 void GraphicElementBase::setPosition(QPointF pos) {mRect.translate(pos-mRect.topLeft());}
 
+QPoint GraphicElementBase::getPosition()
+{
+    return mRect.topLeft().toPoint();
+}
+
 void GraphicElementBase::_addChild(GraphicElementBase *newChild) {
     mChildren.append(newChild);
     newChild->_setParent(this);

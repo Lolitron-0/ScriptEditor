@@ -36,8 +36,11 @@ private:
     Block* _getWithPendingConnection();
 
     QImage mGrid;
+    QPoint mGridPosition;
     QVector<std::shared_ptr<Block>> mBlocks;
-    QTextEdit edit;
+
+    bool mScreenGrabbed{false};
+    QPoint mGridGrabOffset;
 
     //private add block method to set up connects
     QTimer mRefreshTimer;

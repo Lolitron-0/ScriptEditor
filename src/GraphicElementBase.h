@@ -39,6 +39,7 @@ public:
 
     // Sets the position of rect's top left corner
     void setPosition(QPointF pos);
+    QPoint getPosition();
 
 protected:
     void _addChild(GraphicElementBase* newChild);

@@ -14,10 +14,11 @@
 ✔ blocks contents @started(23-01-04 01:55) @done(23-01-04 22:53) @lasted(20h58m)
     ✔ textbox @done(23-01-04 22:53)
 ☐ UI
+    ☐ rect selection
     ☐ font change
     ☐ preview
     ☐ minimap
-    ☐ whole screen dragging
+    ✔ whole screen dragging @started(23-01-04 23:51) @done(23-01-05 01:00) @lasted(1h9m47s)
 ☐ save/load
 ☐ cmon, make a fucking game
     ☐ ui

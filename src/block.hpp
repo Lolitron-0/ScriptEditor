@@ -38,6 +38,8 @@ public:
     bool mouseDoubleClickEvent(QMouseEvent *event) override;
     bool mouseMoveEvent(QMouseEvent *event) override;
 
+    void grab(QPoint pos);
+    void release();
     void connectTo(Block* block);
     void disconnectFrom(Block* block);
     void deletePendingConnection();

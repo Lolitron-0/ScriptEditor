@@ -30,7 +30,7 @@ void Em1::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
 
-    painter.drawImage(QPoint(), mGrid);
+    painter.drawImage(mGridPosition, mGrid);
 
     for (int i = 0; i < mBlocks.size(); i++) {
         mBlocks[i]->draw(painter);
@@ -68,6 +68,14 @@ void Em1::mousePressEvent(QMouseEvent *event)
         }
     }
 
+    if (event->button() == Qt::MouseButton::MiddleButton) {
+        mScreenGrabbed = true;
+        mGridGrabOffset = event->pos() - mGridPosition;
+        for (int i = 0 ; i < mBlocks.size(); i++)
+            mBlocks[i]->grab(event->pos());
+    }
+
+
     //front line
     for (int i = 0; i<mBlocks.size(); i++)
         mBlocks[i]->processFrontLine(InputListener::EventType::MousePress, event);
@@ -96,6 +104,12 @@ void Em1::mouseReleaseEvent(QMouseEvent *event)
         }
     }
 
+    if (event->button() == Qt::MouseButton::MiddleButton) {
+        mScreenGrabbed = false;
+        for (int i = 0 ; i < mBlocks.size(); i++)
+            mBlocks[i]->release();
+    }
+
     if (blockWithPendingConnection) { // failed to connect
         _addBlock(event->pos());
         blockWithPendingConnection->connectTo(mBlocks.last().get());
@@ -121,7 +135,8 @@ void Em1::mouseDoubleClickEvent(QMouseEvent *event)
     for (int i = 0; i<mBlocks.size(); i++)
         mBlocks[i]->processFrontLine(InputListener::EventType::MouseDoubleClick, event);
 
-    _addBlock(event->pos());
+    if (event->button() == Qt::MouseButton::LeftButton)
+        _addBlock(event->pos());
     repaint();
 }
 
@@ -135,6 +150,21 @@ void Em1::mouseMoveEvent(QMouseEvent *event)
                 !blockWithPendingConnection &&
                 mBlocks[i]->isSelected()) // priority to selected
             return; // if someone handled we interrupt everything, do not interrupt block with pending connection
+    }
+
+    if (mScreenGrabbed) {
+        auto nextPosition = (mGridGrabOffset - event->pos());
+        if (nextPosition.x()<0  ||
+            nextPosition.y()<0) { //if we are out of bounds
+            mGridGrabOffset = event->pos() - mGridPosition;
+            for (int i = 0 ; i < mBlocks.size(); i++)
+                mBlocks[i]->release();
+        }
+        else {
+            mGridPosition = event->pos() - mGridGrabOffset;
+            for (int i = 0 ; i < mBlocks.size(); i++)
+                mBlocks[i]->grab(event->pos());
+        }
     }
 
     //front line
