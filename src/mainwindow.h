@@ -18,6 +18,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void initMenuBar();
+
 private:
     Ui::MainWindow *ui;
     Em1* mMainEditor;
