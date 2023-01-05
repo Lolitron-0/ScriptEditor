@@ -59,7 +59,7 @@ void Em1::mousePressEvent(QMouseEvent *event)
     for (int i = 0; i<mBlocks.size(); i++) // deselect all
         mBlocks[i]->setSelected(false);
 
-    for (int i = 0; i<mBlocks.size(); i++) {
+    for (int i = mBlocks.size()-1; i >= 0; i--) {
         if (mBlocks[i]->mousePressEvent(event)) {
             if (event->button() == Qt::MouseButton::RightButton) {
                 _deleteBlockAt(i);
@@ -99,8 +99,8 @@ void Em1::mouseReleaseEvent(QMouseEvent *event)
                         !mBlocks[i]->alreadyConnected(blockWithPendingConnection)) {
                     blockWithPendingConnection->connectTo(mBlocks[i].get());
                 }
+                return; // if someone handled during connection we interrupt everything
             }
-            return; // if someone handled we interrupt everything
         }
     }
 
@@ -194,7 +194,7 @@ void Em1::_addBlock(QPoint pos)
         qDebug()<<"off";
     });
     */
-    newBlock->setTextEditPtr(std::make_shared<QTextEdit>(this)); // due to my stupidness we need to init QWidgets outside
+    newBlock->initQWidgets(this); // due to my stupidness we need to init QWidgets outside
     mBlocks.push_back(newBlock);
 }
 

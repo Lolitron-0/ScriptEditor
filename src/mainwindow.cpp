@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     initMenuBar();
 
     mMainEditor = new Em1(this);
-    this->layout()->addWidget(mMainEditor);
+    mMainEditor->setVisible(true);
 }
 
 MainWindow::~MainWindow()
@@ -23,5 +23,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::initMenuBar()
 {
+    auto fileMenu = menuBar()->addMenu("File");
+    fileMenu->addMenu("New");
 }
 

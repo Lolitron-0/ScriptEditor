@@ -261,6 +261,21 @@ void Block::processFrontLine(EventType type, QMouseEvent* event)
     }
 }
 
+void Block::initQWidgets(QWidget *parent)
+{
+    mEdit = std::make_shared<QTextEdit>(parent);
+    mEdit->setFontFamily("Consolas");
+    mEdit->setStyleSheet(QString::fromUtf8(R"STYLE(
+QTextEdit {
+    background-color: rgba(50,50,50,50);
+    border-radius: 6px;
+    color: white;
+}
+)STYLE"));
+    mEdit->setFont(mTextEditFont);
+    mEdit->setVisible(true);
+}
+
 const QColor &Block::getShadowColor() const
 {
     return mShadowColor;
@@ -306,26 +321,6 @@ QPointF Block::getPinCenter() const
 bool Block::hasPendingConnection() const
 {
     return mPendingConnection;
-}
-
-std::shared_ptr<QTextEdit> Block::getTextEditPtr() const
-{
-    return mEdit;
-}
-
-void Block::setTextEditPtr(const std::shared_ptr<QTextEdit> &newPtr)
-{
-    mEdit = newPtr;
-    mEdit->setFontFamily("Consolas");
-    mEdit->setStyleSheet(QString::fromUtf8(R"STYLE(
-QTextEdit {
-    background-color: rgba(50,50,50,50);
-    border-radius: 6px;
-    color: white;
-}
-)STYLE"));
-    mEdit->setFont(mTextEditFont);
-    mEdit->setVisible(true);
 }
 
 QRectF Block::_getDrawRect()

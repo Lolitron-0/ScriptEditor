@@ -47,6 +47,7 @@ public:
     bool alreadyConnected(Block*);
     // processes front line elements (all-in-one)
     void processFrontLine(InputListener::EventType type, QMouseEvent* );
+    void initQWidgets(QWidget* parent);
 
     const QColor &getShadowColor() const;
     void setShadowColor(const QColor &newShadowColor);
@@ -60,9 +61,6 @@ public:
     BlockConnectionPin &getPin();
     QPointF getPinCenter() const;
     bool hasPendingConnection() const;
-
-    std::shared_ptr<QTextEdit> getTextEditPtr() const;
-    void setTextEditPtr(const std::shared_ptr<QTextEdit>&);
 
 signals:
     void startContiniousRepaint();
