@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QDebug>
 #include <QPainterPath>
+#include <QSharedPointer>
 
 
 Em1::Em1(QWidget *parent)
@@ -181,9 +182,35 @@ void Em1::wheelEvent(QWheelEvent *event)
 
 }
 
+void Em1::reset()
+{
+    auto blocksToDelete = mBlocks.size();
+    for (int i = 0; i < blocksToDelete; i++) {
+        _deleteBlockAt(0); //deleting 0 block will ignore shifting after removal
+    }
+}
+
+void Em1::save(QDataStream &stream)
+{
+    stream << mBlocks.size();
+    for (int i = 0; i < mBlocks.size(); i++)
+        stream << *mBlocks[i].get();
+}
+
+void Em1::load(QDataStream &stream)
+{
+    int blockCount;
+    stream >> blockCount;
+    for (int i = 0; i < blockCount; i++) {
+        Block newBlock(0,0, this);
+        stream >> newBlock;
+        mBlocks.append(std::make_shared<Block>(std::move(newBlock)));
+    }
+}
+
 void Em1::_addBlock(QPoint pos)
 {
-    auto newBlock = std::make_shared<Block>(pos.x(), pos.y());
+    auto newBlock = std::make_shared<Block>(pos.x(), pos.y(), this);
     /*
     connect(&*newBlock, &Block::startContiniousRepaint, this, [this]() {
         this->mRefreshTimer.start(5);
@@ -194,7 +221,6 @@ void Em1::_addBlock(QPoint pos)
         qDebug()<<"off";
     });
     */
-    newBlock->initQWidgets(this); // due to my stupidness we need to init QWidgets outside
     mBlocks.push_back(newBlock);
 }
 

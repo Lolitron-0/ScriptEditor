@@ -5,7 +5,7 @@ QColor Block::selectionColor = QColor(Qt::yellow).darker(100);
 QColor Block::fillColor = QColor(252,50,50);
 
 
-Block::Block(float x, float y)
+Block::Block(float x, float y, QWidget *parent)
     :GraphicElementBase(x-defaultWidth/2,y-defaultHeight/2,defaultWidth,defaultHeight), mGrabAnim(this),
      mShadowColor(Qt::transparent), mPin(this), mTextFont("Consolas"), mTitle("Story")
 {
@@ -41,15 +41,16 @@ Block::Block(float x, float y)
 
     mTextFont.setPixelSize(15);
     mTextFont.setBold(true);
-    // text edit setup is in it's set method
     mTextEditFont.setFamily("Consolas");
     mTextEditFont.setPointSize(8);
+
+    initQWidgets(parent);
 }
 
 Block::Block(const Block &b)
-    :Block(b.getRect().x(), b.getRect().y())
+    :Block(b.getRect().center().x(), b.getRect().center().y(), b.mEdit->parentWidget())
 {
-
+    mEdit->setText(b.mEdit->toPlainText());
 }
 
 Block::~Block()
@@ -61,12 +62,14 @@ Block &Block::operator=(const Block &b)
 {
     Block tmp(b);
     std::swap(mRect, tmp.mRect);
+    std::swap(mEdit, tmp.mEdit);
     return *this;
 }
 
 Block &Block::operator=(Block &&b)
 {
     std::swap(mRect, b.mRect);
+    std::swap(mEdit, b.mEdit);
     return *this;
 }
 
@@ -326,4 +329,19 @@ bool Block::hasPendingConnection() const
 QRectF Block::_getDrawRect()
 {
     return mRect.translated(mLiftUpDelta);
+}
+
+QDataStream &operator<<(QDataStream &out, const Block &block) {
+    out << block.mRect.center() << block.mEdit->toPlainText();
+    return out;
+}
+
+QDataStream &operator>>(QDataStream &in, Block &block) {
+    QPointF blockCenter;
+    in >> blockCenter;
+    block.mRect.moveCenter(blockCenter);
+    QString contentText;
+    in >> contentText;
+    block.mEdit->setText(contentText);
+    return in;
 }

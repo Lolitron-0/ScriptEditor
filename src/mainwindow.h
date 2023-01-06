@@ -4,6 +4,7 @@
 #include "em1.hpp"
 
 #include <QMainWindow>
+#include <QSettings>
 #include <QTextEdit>
 
 QT_BEGIN_NAMESPACE

@@ -2,6 +2,7 @@
 #define EM1_HPP
 
 #include "block.hpp"
+#include <QSettings>
 #include <QTimer>
 #include <QWidget>
 
@@ -12,6 +13,12 @@ public:
     Em1(QWidget* parent = nullptr);
 
     typedef std::shared_ptr<Block> BlockPtr;
+
+    // resets the scene to the state of new file
+    void reset();
+    // adds registries about blocks to the save object
+    void save(QDataStream&);
+    void load(QDataStream&);
 
 protected:
     void paintEvent(QPaintEvent *event) override;

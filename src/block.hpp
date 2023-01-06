@@ -5,6 +5,7 @@
 #include "blockconnectionpin.hpp"
 #include "graphicelementbase.h"
 
+#include <QDataStream>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QParallelAnimationGroup>
@@ -20,7 +21,8 @@ public:
     Q_PROPERTY(QColor shadowColor MEMBER mShadowColor READ getShadowColor WRITE setShadowColor)
     Q_PROPERTY(QPointF liftUpDelta MEMBER mLiftUpDelta READ getLiftUpDelta WRITE setLiftUpDelta)
 
-    Block(float x, float y);
+    // creates block with center at (x, y)
+    Block(float x, float y, QWidget* parent);
     Block(const Block&);
     ~Block();
 
@@ -100,6 +102,10 @@ private:
     static QColor fillColor;
     static const int roundRadius = 6;
     static const int selectionWidth = 2;
+
+private:
+    friend QDataStream& operator<<(QDataStream& out, const Block& block);
+    friend QDataStream& operator>>(QDataStream& in, Block& block);
 };
 
 
