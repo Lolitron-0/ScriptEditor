@@ -5,9 +5,9 @@ QColor Block::selectionColor = QColor(Qt::yellow).darker(100);
 QColor Block::fillColor = QColor(252,50,50);
 
 
-Block::Block(float x, float y, QWidget *parent)
-    :GraphicElementBase(x-defaultWidth/2,y-defaultHeight/2,defaultWidth,defaultHeight), mGrabAnim(this),
-     mShadowColor(Qt::transparent), mPin(this), mTextFont("Consolas"), mTitle("Story")
+Block::Block(float x, float y, QWidget *parent, int id)
+    :GraphicElementBase(x-defaultWidth/2,y-defaultHeight/2,defaultWidth,defaultHeight), mId(id),
+      mGrabAnim(this), mShadowColor(Qt::transparent), mPin(this), mTextFont("Consolas"), mTitle("Story")
 {
     mBotGradient.setColorAt(0,fillColor.lighter(150));
     mBotGradient.setColorAt(0.2,fillColor);
@@ -48,7 +48,7 @@ Block::Block(float x, float y, QWidget *parent)
 }
 
 Block::Block(const Block &b)
-    :Block(b.getRect().center().x(), b.getRect().center().y(), b.mEdit->parentWidget())
+    :Block(b.getRect().center().x(), b.getRect().center().y(), b.mEdit->parentWidget(), b.mId)
 {
     mEdit->setText(b.mEdit->toPlainText());
 }
@@ -63,6 +63,7 @@ Block &Block::operator=(const Block &b)
     Block tmp(b);
     std::swap(mRect, tmp.mRect);
     std::swap(mEdit, tmp.mEdit);
+    std::swap(mId, tmp.mId);
     return *this;
 }
 
@@ -70,6 +71,7 @@ Block &Block::operator=(Block &&b)
 {
     std::swap(mRect, b.mRect);
     std::swap(mEdit, b.mEdit);
+    std::swap(mId, b.mId);
     return *this;
 }
 
@@ -174,6 +176,7 @@ bool Block::mouseReleaseEvent(QMouseEvent *event)
 bool Block::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if (GraphicElementBase::mouseDoubleClickEvent(event)) return true;
+    if(mHovered)qDebug()<<mId;
     return mHovered;
 }
 
@@ -279,6 +282,11 @@ QTextEdit {
     mEdit->setVisible(true);
 }
 
+int Block::getId() const
+{
+    return mId;
+}
+
 const QColor &Block::getShadowColor() const
 {
     return mShadowColor;
@@ -326,13 +334,22 @@ bool Block::hasPendingConnection() const
     return mPendingConnection;
 }
 
+QVector<int> Block::getTiedIds()
+{
+    QVector<int> r;
+    for(int i = 0; i < mOutConnections.size(); i++) {
+        r.append(mOutConnections[i]->to()->getId());
+    }
+    return r;
+}
+
 QRectF Block::_getDrawRect()
 {
     return mRect.translated(mLiftUpDelta);
 }
 
 QDataStream &operator<<(QDataStream &out, const Block &block) {
-    out << block.mRect.center() << block.mEdit->toPlainText();
+    out << block.mRect.center() << block.mEdit->toPlainText() << block.mId;
     return out;
 }
 
@@ -343,5 +360,6 @@ QDataStream &operator>>(QDataStream &in, Block &block) {
     QString contentText;
     in >> contentText;
     block.mEdit->setText(contentText);
+    in >> block.mId;
     return in;
 }

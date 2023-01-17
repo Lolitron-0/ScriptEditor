@@ -1,5 +1,5 @@
 #include "em1.hpp"
-#include "qlayout.h"
+#include "utils.hpp"
 
 #include <QKeyEvent>
 #include <QPainter>
@@ -195,6 +195,13 @@ void Em1::save(QDataStream &stream)
     stream << mBlocks.size();
     for (int i = 0; i < mBlocks.size(); i++)
         stream << *mBlocks[i].get();
+    for (int i = 0; i < mBlocks.size(); i++) {
+        auto cons = mBlocks[i]->getTiedIds();
+        stream<<mBlocks[i]->getId();
+        stream<<cons;
+    }
+
+    stream << IdGenerator::getInstance();
 }
 
 void Em1::load(QDataStream &stream)
@@ -202,15 +209,27 @@ void Em1::load(QDataStream &stream)
     int blockCount;
     stream >> blockCount;
     for (int i = 0; i < blockCount; i++) {
-        Block newBlock(0,0, this);
+        Block newBlock(0,0, this, -1);
         stream >> newBlock;
         mBlocks.append(std::make_shared<Block>(std::move(newBlock)));
     }
+    for (int i = 0; i < blockCount; i++) {
+        int curId;
+        stream >> curId;
+        auto block = _getById(curId);
+        QVector<int> cons;
+        stream>>cons;
+        foreach (int id, cons) {
+            block->connectTo(_getById(id));
+        }
+    }
+
+    stream >> IdGenerator::getInstance();
 }
 
 void Em1::_addBlock(QPoint pos)
 {
-    auto newBlock = std::make_shared<Block>(pos.x(), pos.y(), this);
+    auto newBlock = std::make_shared<Block>(pos.x(), pos.y(), this, IdGenerator::getInstance().getNextId());
     /*
     connect(&*newBlock, &Block::startContiniousRepaint, this, [this]() {
         this->mRefreshTimer.start(5);
@@ -260,4 +279,19 @@ Block *Em1::_getWithPendingConnection()
             return mBlocks[i].get();
     }
     return nullptr;
+}
+
+Block* Em1::_getById(int id)
+{
+    //we assume that mBlocks is stable and ids are added incrementally so binary search can be used
+    int l = 0, r = mBlocks.size(), mid;
+    bool found = false;
+    while (l<=r && !found) {
+        mid = (l+r)/2;
+        if (mBlocks[mid]->getId() == id) found = true;
+        else if (mBlocks[mid]->getId() > id) r = mid-1;
+        else l = mid+1;
+    }
+
+    return (found ? mBlocks[mid].get() : nullptr);
 }

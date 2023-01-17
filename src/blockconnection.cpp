@@ -69,7 +69,6 @@ void BlockConnection::draw(QPainter &painter)
         mPath.clear();
         mPath.moveTo(mFrom->getPinCenter());
         mPath.lineTo(mTo->getPinCenter());
-        // archived since hover is too complicated ))
 //        auto vec = mTo->getPinCenter() - mFrom->getPinCenter();
 //        mPath.cubicTo( // bezier curves with control points on 1/3 and 2/3 of the vector + 90 deg rotated vector
 //                   mFrom->getPinCenter() + 0.33*vec + QPointF((0.33*vec).y(), -(0.33*vec).x()),
@@ -104,6 +103,11 @@ float BlockConnection::_isHovered(QPoint point) const
 {
     if (!mTo) return false;
 
+//    for (float i = 0.0; i <= 1; i+=0.01) {
+//        auto p = mPath.pointAtPercent(i);
+//    }
+
+// line distance
     QVector2D v(mFrom->getPinCenter());
     QVector2D w(mTo->getPinCenter());
     QVector2D p(point);

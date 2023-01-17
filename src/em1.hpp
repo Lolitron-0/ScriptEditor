@@ -41,6 +41,7 @@ private:
     int _getSelectedBlockIndex();
 
     Block* _getWithPendingConnection();
+    Block* _getById(int id);
 
     QImage mGrid;
     QPoint mGridPosition;

@@ -22,7 +22,7 @@ public:
     Q_PROPERTY(QPointF liftUpDelta MEMBER mLiftUpDelta READ getLiftUpDelta WRITE setLiftUpDelta)
 
     // creates block with center at (x, y)
-    Block(float x, float y, QWidget* parent);
+    Block(float x, float y, QWidget* parent ,int id);
     Block(const Block&);
     ~Block();
 
@@ -51,6 +51,8 @@ public:
     void processFrontLine(InputListener::EventType type, QMouseEvent* );
     void initQWidgets(QWidget* parent);
 
+    int getId() const;
+
     const QColor &getShadowColor() const;
     void setShadowColor(const QColor &newShadowColor);
 
@@ -64,6 +66,9 @@ public:
     QPointF getPinCenter() const;
     bool hasPendingConnection() const;
 
+    //returns ids of blocks it is connected with (only out connections) for save/load purposes
+    QVector<int> getTiedIds();
+
 signals:
     void startContiniousRepaint();
     void stopContiniousRepaint();
@@ -71,6 +76,8 @@ signals:
 private:
 
     QRectF _getDrawRect();
+
+    int mId;
 
     QLinearGradient mBotGradient;
     QBrush mBrush;

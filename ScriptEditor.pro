@@ -24,7 +24,8 @@ HEADERS += \
     src/em1.hpp \
     src/graphicelementbase.h \
     src/inputlistener.hpp \
-    src/mainwindow.h
+    src/mainwindow.h \
+    src/utils.hpp
 
 FORMS += \
     mainwindow.ui
